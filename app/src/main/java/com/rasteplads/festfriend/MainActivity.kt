@@ -17,6 +17,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -131,6 +132,21 @@ fun LandingScreen(navController: NavHostController){
 }
 
 @Composable
+fun BackButton(onClick: () -> Unit){
+    Row(
+        horizontalArrangement = Arrangement.Absolute.Left,
+        modifier = Modifier.fillMaxWidth(1f)
+    ){
+        TextButton(onClick = onClick) {
+            Text(
+                text = "👈😎",
+                style = TextStyle(fontSize = 24.sp)
+            )
+        }
+    }
+}
+
+@Composable
 fun CreateGroupScreen(
     navController: NavHostController,
     username: String,
@@ -142,6 +158,7 @@ fun CreateGroupScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        BackButton {navController.popBackStack()}
         Spacer(modifier = Modifier.weight(0.8f))
         Text(
             text = "FestFriend",
@@ -190,6 +207,7 @@ fun JoinGroupScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        BackButton {navController.popBackStack()}
         Spacer(modifier = Modifier.weight(0.8f))
         Text(
             text = "FestFriend",
