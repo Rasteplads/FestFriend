@@ -21,17 +21,18 @@ import com.rasteplads.festfriend.pages.shared.BackButton
 
 @Composable
 fun CreateGroupPage(
-    navController: NavHostController,
     username: String,
     password: String,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    onCreateButtonClick: () -> Unit,
+    onBackButtonClick: () -> Unit,
 ){
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        BackButton {navController.popBackStack()}
+        BackButton(onClick = onBackButtonClick)
         Spacer(modifier = Modifier.weight(0.8f))
         Text(
             text = "FestFriend",
@@ -57,7 +58,7 @@ fun CreateGroupPage(
                 .fillMaxWidth(0.8f)
         )
         Button(
-            onClick = { navController.navigate(FestFriendScreen.Map.name) },
+            onClick = onCreateButtonClick,
             modifier = Modifier.fillMaxWidth(0.8f)
         ) {
             Text(text = "Create Group")
