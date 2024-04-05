@@ -19,7 +19,10 @@ import androidx.navigation.NavHostController
 import com.rasteplads.festfriend.FestFriendScreen
 
 @Composable
-fun LandingPage(navController: NavHostController){
+fun LandingPage(
+    onCreateButtonClick: () -> Unit,
+    onJoinButtonClick: () -> Unit,
+){
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -32,14 +35,14 @@ fun LandingPage(navController: NavHostController){
         )
         Spacer(modifier = Modifier.weight(0.2f))
         Button(
-            onClick = { navController.navigate(FestFriendScreen.CreateGroup.name) },
+            onClick = onCreateButtonClick,
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
             modifier = Modifier.fillMaxWidth(0.8f)
         ){
             Text(text = "Create Group")
         }
         Button(
-            onClick = { navController.navigate(FestFriendScreen.JoinGroup.name) },
+            onClick = onJoinButtonClick,
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary),
             modifier = Modifier.fillMaxWidth(0.8f)
         ){
