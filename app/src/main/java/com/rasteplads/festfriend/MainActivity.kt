@@ -1,6 +1,7 @@
 package com.rasteplads.festfriend
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -31,11 +32,54 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.rasteplads.festfriend.model.GroupID
+import com.rasteplads.festfriend.repository.Repository
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var viewModel: MainViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val repository = Repository()
+        val viewModelFactory = MainViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
+        viewModel.createGroup("beans")
+        viewModel.MessageResponse.observe(this, Observer { response ->
+            if(response.isSuccessful){
+                response.body()?.let {
+                    Log.d("Response", it.groupID)
+                }
+            }
+            else {
+                Log.d("Response", response.errorBody().toString())
+                Log.d("Response", response.code().toString())
+            }
+        })
+        val joinedGroup = viewModel.MessageResponse.value?.body()
+
+        if (joinedGroup != null) {
+            viewModel.joinGroup(joinedGroup.groupID, "Tom", "beans")
+            viewModel.GroupResponse.observe(this, Observer { response ->
+                if(response.isSuccessful){
+                    response.body()?.let {
+                        Log.d("Response", it.message)
+                    }
+                }
+                else {
+                    Log.d("Response", response.errorBody().toString())
+                    Log.d("Response", response.code().toString())
+                }
+            })
+        }
+
+
+
+
+
         setContent {
             FestFriendTheme (dynamicColor = false){
                 MyApp("Menis", Modifier.fillMaxSize())
