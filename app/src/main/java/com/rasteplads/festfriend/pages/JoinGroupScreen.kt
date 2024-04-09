@@ -27,7 +27,8 @@ fun JoinGroupPage(
     password: String,
     onUsernameChange: (String) -> Unit,
     onGroupIDChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit
+    onPasswordChange: (String) -> Unit,
+    onJoinGroupRequest: () -> Unit
 ){
     Column(
         verticalArrangement = Arrangement.Center,
@@ -67,7 +68,7 @@ fun JoinGroupPage(
                 .fillMaxWidth(0.8f)
         )
         Button(
-            onClick = { navController.navigate(FestFriendScreen.Map.name) },
+            onClick = onJoinGroupRequest,
             modifier = Modifier.fillMaxWidth(0.8f)) {
             Text(text = "Join Group")
         }

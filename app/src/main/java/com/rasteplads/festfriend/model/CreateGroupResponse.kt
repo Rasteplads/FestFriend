@@ -1,5 +1,5 @@
 package com.rasteplads.festfriend.model
 
-data class GroupID(
+data class CreateGroupResponse(
     val groupID: String
 )

@@ -1,5 +1,5 @@
 package com.rasteplads.festfriend.model
 
-data class Members (
+data class GetMembersResponse (
     val members : Array<String>
 )

@@ -1,6 +1,6 @@
 package com.rasteplads.festfriend.model
 
-data class GetMembers(
+data class GetMembersRequest(
     val groupID: String,
     val password: String
 )

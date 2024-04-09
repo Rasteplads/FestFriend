@@ -1,5 +1,5 @@
 package com.rasteplads.festfriend.model
 
-data class Password(
+data class CreateGroupRequest(
     val password: String
 )

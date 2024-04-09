@@ -26,6 +26,7 @@ fun CreateGroupPage(
     password: String,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    onCreateGroupRequest: () -> Unit,
 ){
     Column(
         verticalArrangement = Arrangement.Center,
@@ -57,7 +58,7 @@ fun CreateGroupPage(
                 .fillMaxWidth(0.8f)
         )
         Button(
-            onClick = { navController.navigate(FestFriendScreen.Map.name) },
+            onClick = onCreateGroupRequest,
             modifier = Modifier.fillMaxWidth(0.8f)
         ) {
             Text(text = "Create Group")

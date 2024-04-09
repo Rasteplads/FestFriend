@@ -1,5 +1,5 @@
 package com.rasteplads.festfriend.model
 
-data class Message(
+data class JoinGroupResponse(
     val message: String
 )
