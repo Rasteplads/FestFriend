@@ -29,12 +29,6 @@ import com.rasteplads.festfriend.pages.MapPage
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
 
 
-
-
-
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-
 class MainActivity : ComponentActivity() {
 
     lateinit var viewModel: MainViewModel
@@ -82,7 +76,6 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
             }
             composable(FestFriendScreen.CreateGroup.name){
                 CreateGroupPage(
-                    navController,
                     username,
                     password,
                     onUsernameChange = {username = it },
@@ -103,7 +96,6 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
             }
             composable(FestFriendScreen.JoinGroup.name){
                 JoinGroupPage(
-                    navController,
                     username,
                     groupID,
                     password,
@@ -123,7 +115,7 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
                 )
             }
             composable(FestFriendScreen.Map.name){
-                MapPage(navController, groupID, password, username)
+                MapPage(groupID, password, username)
             }
         }
     }

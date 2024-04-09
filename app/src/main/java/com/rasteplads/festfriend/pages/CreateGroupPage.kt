@@ -21,7 +21,6 @@ import com.rasteplads.festfriend.pages.shared.BackButton
 
 @Composable
 fun CreateGroupPage(
-    navController: NavHostController,
     username: String,
     password: String,
     onUsernameChange: (String) -> Unit,
