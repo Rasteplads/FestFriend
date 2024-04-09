@@ -1,34 +1,18 @@
 package com.rasteplads.festfriend
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,7 +20,21 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.rasteplads.festfriend.model.GroupID
 import com.rasteplads.festfriend.repository.Repository
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.rasteplads.festfriend.pages.CreateGroupPage
+import com.rasteplads.festfriend.pages.JoinGroupPage
+import com.rasteplads.festfriend.pages.LandingPage
+import com.rasteplads.festfriend.pages.MapPage
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
+
+
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+
 
 class MainActivity : ComponentActivity() {
 
@@ -81,135 +79,60 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
-            FestFriendTheme (dynamicColor = false){
-                MyApp("Menis", Modifier.fillMaxSize())
+            FestFriendApplication()
+        }
+    }
+}
+
+@Composable
+fun FestFriendApplication(){
+    FestFriendTheme (dynamicColor = false){
+        MyApp(Modifier.fillMaxSize())
+    }
+}
+
+enum class FestFriendScreen() {
+    Landing,
+    CreateGroup,
+    JoinGroup,
+    Map
+}
+
+@Composable
+fun MyApp(modifier: Modifier = Modifier) {
+    val navController = rememberNavController()
+    var groupID by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    Surface(modifier) {
+        NavHost(navController, startDestination = FestFriendScreen.Landing.name){
+            composable(FestFriendScreen.Landing.name){
+                LandingPage(navController)
+            }
+            composable(FestFriendScreen.CreateGroup.name){
+                CreateGroupPage(
+                    navController,
+                    username,
+                    password,
+                    onUsernameChange = {username = it },
+                    onPasswordChange = {password = it }
+                )
+            }
+            composable(FestFriendScreen.JoinGroup.name){
+                JoinGroupPage(
+                    navController,
+                    username,
+                    groupID,
+                    password,
+                    onGroupIDChange = {groupID = it},
+                    onUsernameChange = {username = it },
+                    onPasswordChange = {password = it }
+                )
+            }
+            composable(FestFriendScreen.Map.name){
+                MapPage(navController, groupID, password, username)
             }
         }
-    }
-}
-
-@Composable
-fun MyApp(name: String, modifier: Modifier = Modifier) {
-    Surface(modifier) {
-        LandingPage()
-    }
-}
-
-@Composable
-fun LandingPage(){
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.weight(0.8f))
-        Text(
-            text = "FestFriend",
-            modifier = Modifier.padding(10.dp),
-            style = TextStyle(fontSize = 48.sp)
-        )
-        Spacer(modifier = Modifier.weight(0.2f))
-        Button(
-            onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-            modifier = Modifier.fillMaxWidth(0.8f)
-        ){
-            Text(text = "Create Group")
-        }
-        Button(
-            onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary),
-            modifier = Modifier.fillMaxWidth(0.8f)
-        ){
-            Text(text = "Join Group")
-        }
-        Spacer(modifier = Modifier.weight(1f))
-    }
-}
-
-@Composable
-fun CreateGroupPage(){
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.weight(0.8f))
-        Text(
-            text = "FestFriend",
-            modifier = Modifier.padding(10.dp),
-            style = TextStyle(fontSize = 48.sp)
-        )
-        Spacer(modifier = Modifier.weight(0.2f))
-        TextField(
-            value = "",
-            onValueChange = {},
-            placeholder = { Text("Username") },
-            modifier = Modifier.padding(bottom = 15.dp, top = 15.dp).fillMaxWidth(0.8f)
-        )
-        Divider(Modifier.fillMaxWidth(0.8f) )
-        TextField(
-            value = "",
-            onValueChange = {},
-            placeholder = { Text("Group Password") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.padding(bottom = 15.dp, top = 15.dp).fillMaxWidth(0.8f)
-        )
-        Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth(0.8f)) {
-            Text(text = "Create Group")
-        }
-        Spacer(modifier = Modifier.weight(1f))
-    }
-}
-
-@Composable
-fun JoinGroupPage(){
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.weight(0.8f))
-        Text(
-            text = "FestFriend",
-            modifier = Modifier.padding(10.dp),
-            style = TextStyle(fontSize = 48.sp)
-        )
-        Spacer(modifier = Modifier.weight(0.2f))
-        TextField(
-            value = "",
-            onValueChange = {},
-            placeholder = { Text("Username") },
-            modifier = Modifier.padding(bottom = 15.dp).fillMaxWidth(0.8f)
-        )
-        Divider(Modifier.fillMaxWidth(0.8f) )
-        TextField(
-            value = "",
-            onValueChange = {},
-            placeholder = { Text("Group ID") },
-            modifier = Modifier.padding(bottom = 15.dp, top = 15.dp).fillMaxWidth(0.8f)
-        )
-        TextField(
-            value = "",
-            onValueChange = {},
-            placeholder = { Text("Group Password") },
-            modifier = Modifier.padding(bottom = 15.dp).fillMaxWidth(0.8f)
-        )
-        Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth(0.8f)) {
-            Text(text = "Join Group")
-        }
-        Spacer(modifier = Modifier.weight(1f))
-    }
-}
-
-@Composable
-fun MapPage(){
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "ID",
-            modifier = Modifier.padding(10.dp),
-            style = TextStyle(fontSize = 48.sp)
-        )
     }
 }
 
@@ -217,8 +140,6 @@ fun MapPage(){
 @Preview
 @Composable
 fun MyAppPreview() {
-    FestFriendTheme (dynamicColor = false) {
-        MyApp("prev", Modifier.fillMaxSize())
-    }
+    FestFriendApplication()
 }
 
