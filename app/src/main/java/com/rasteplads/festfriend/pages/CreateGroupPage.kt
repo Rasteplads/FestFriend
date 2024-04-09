@@ -26,13 +26,14 @@ fun CreateGroupPage(
     password: String,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onCreateGroupRequest: () -> Unit,
+    onCreateButtonClick: () -> Unit,
+    onBackButtonClick: () -> Unit,
 ){
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        BackButton {navController.popBackStack()}
+        BackButton(onClick = onBackButtonClick)
         Spacer(modifier = Modifier.weight(0.8f))
         Text(
             text = "FestFriend",
@@ -58,7 +59,7 @@ fun CreateGroupPage(
                 .fillMaxWidth(0.8f)
         )
         Button(
-            onClick = onCreateGroupRequest,
+            onClick = onCreateButtonClick,
             modifier = Modifier.fillMaxWidth(0.8f)
         ) {
             Text(text = "Create Group")

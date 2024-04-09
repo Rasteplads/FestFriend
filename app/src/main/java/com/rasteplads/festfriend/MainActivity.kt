@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import com.rasteplads.festfriend.repository.Repository
 import androidx.datastore.core.DataStore
@@ -28,10 +29,14 @@ import com.rasteplads.festfriend.pages.MapPage
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
 
 
+
+
+
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 
 class MainActivity : ComponentActivity() {
+
     lateinit var viewModel: MainViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +44,6 @@ class MainActivity : ComponentActivity() {
         val viewModelFactory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
         val req = Requests(viewModel)
-
 
         setContent {
             FestFriendApplication(req)
@@ -71,7 +75,10 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
     Surface(modifier) {
         NavHost(navController, startDestination = FestFriendScreen.Landing.name){
             composable(FestFriendScreen.Landing.name){
-                LandingPage(navController)
+                LandingPage(
+                    onCreateButtonClick = {navController.navigate(FestFriendScreen.CreateGroup.name)},
+                    onJoinButtonClick = {navController.navigate(FestFriendScreen.JoinGroup.name)}
+                )
             }
             composable(FestFriendScreen.CreateGroup.name){
                 CreateGroupPage(
@@ -80,7 +87,7 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
                     password,
                     onUsernameChange = {username = it },
                     onPasswordChange = {password = it },
-                    onCreateGroupRequest = {
+                    onCreateButtonClick = {
                         if (!CheckUsername(username))
                             return@CreateGroupPage
                         else
@@ -90,7 +97,8 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
                                 req.onCreateGroupRequest(username, password)
                                 navController.navigate(FestFriendScreen.Map.name)
                             }
-                    }
+                    },
+                    onBackButtonClick = {navController.popBackStack()}
                 )
             }
             composable(FestFriendScreen.JoinGroup.name){
@@ -102,7 +110,7 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
                     onGroupIDChange = {groupID = it},
                     onUsernameChange = {username = it },
                     onPasswordChange = {password = it },
-                    onJoinGroupRequest = {
+                    onJoinButtonClick = {
                         if (!CheckUsername(username) && !CheckPassword(password)
                             && !CheckGroupID(groupID))
                             return@JoinGroupPage
@@ -110,7 +118,8 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
                             req.onJoinGroupRequest(groupID, username, password)
                             navController.navigate(FestFriendScreen.Map.name)
                         }
-                    }
+                    },
+                    onBackButtonClick = {navController.popBackStack()}
                 )
             }
             composable(FestFriendScreen.Map.name){
@@ -127,6 +136,7 @@ fun MyAppPreview() {
     FestFriendApplication()
 }
 */
+
 
 fun CheckUsername(username: String): Boolean {
     if(username.length < 2){
