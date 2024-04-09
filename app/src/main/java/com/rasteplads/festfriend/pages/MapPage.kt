@@ -12,7 +12,6 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun MapPage(
-    navController: NavHostController,
     groupID: String,
     password: String,
     username: String,
