@@ -1,6 +1,5 @@
 package com.rasteplads.festfriend
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -13,21 +12,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import com.rasteplads.festfriend.repository.Repository
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rasteplads.festfriend.model.Resource
 import com.rasteplads.festfriend.pages.CreateGroupPage
 import com.rasteplads.festfriend.pages.JoinGroupPage
 import com.rasteplads.festfriend.pages.LandingPage
 import com.rasteplads.festfriend.pages.MapPage
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
-
 
 class MainActivity : ComponentActivity() {
 
@@ -37,18 +32,17 @@ class MainActivity : ComponentActivity() {
         val repository = Repository()
         val viewModelFactory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-        val req = Requests(viewModel)
 
         setContent {
-            FestFriendApplication(req)
+            FestFriendApplication(viewModel, this)
         }
     }
 }
 
 @Composable
-fun FestFriendApplication(req: Requests){
+fun FestFriendApplication(viewModel: MainViewModel, mainActivity: MainActivity){
     FestFriendTheme (dynamicColor = false){
-        MyApp(req, Modifier.fillMaxSize())
+        MyApp(viewModel, mainActivity, Modifier.fillMaxSize())
     }
 }
 
@@ -60,7 +54,7 @@ enum class FestFriendScreen() {
 }
 
 @Composable
-fun MyApp(req: Requests, modifier: Modifier = Modifier) {
+fun MyApp(viewModel: MainViewModel, mainActivity: MainActivity, modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     var groupID by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -87,8 +81,22 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
                             if (!CheckPassword(password))
                                 return@CreateGroupPage
                             else{
-                                req.onCreateGroupRequest(username, password)
-                                navController.navigate(FestFriendScreen.Map.name)
+                                viewModel.createGroup(username, password)
+                                viewModel.CreateGroupResponse.observe(mainActivity) { response ->
+                                    when (response) {
+                                        is Resource.Success -> {
+                                            groupID = response.data!!.groupID
+                                            viewModel.joinGroup(groupID, username, password)
+                                            navController.navigate(FestFriendScreen.Map.name)
+                                        }
+                                        is Resource.ErrorResponse -> {
+                                            Log.e("CreateGroupResponse", response.errorResponse.toString())
+                                        }
+                                        is Resource.Error -> {
+                                            Log.e("CreateGroupResponse", "An error has occured")
+                                        }
+                                    }
+                                }
                             }
                     },
                     onBackButtonClick = {navController.popBackStack()}
@@ -107,8 +115,20 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
                             && !CheckGroupID(groupID))
                             return@JoinGroupPage
                         else {
-                            req.onJoinGroupRequest(groupID, username, password)
-                            navController.navigate(FestFriendScreen.Map.name)
+                            viewModel.joinGroup(groupID, username, password)
+                            viewModel.JoinGroupResponse.observe(mainActivity) { response ->
+                                when (response) {
+                                    is Resource.Success -> {
+                                        navController.navigate(FestFriendScreen.Map.name)
+                                    }
+                                    is Resource.ErrorResponse -> {
+                                        Log.e("CreateGroupResponse", response.errorResponse.toString())
+                                    }
+                                    is Resource.Error -> {
+                                        Log.e("CreateGroupResponse", "An error has occured")
+                                    }
+                                }
+                            }
                         }
                     },
                     onBackButtonClick = {navController.popBackStack()}
@@ -127,18 +147,15 @@ fun MyApp(req: Requests, modifier: Modifier = Modifier) {
 fun MyAppPreview() {
     FestFriendApplication()
 }
-*/
-
+ */
 
 fun CheckUsername(username: String): Boolean {
     if(username.length < 2){
         Log.e("UsernameConstraint", "Username is too short")
-        // TODO: Call component that should say that the username is too short
         return true
     }
     else if(username.length > 64) {
         Log.e("UsernameConstraint", "Username is too long")
-        // TODO: Call component that should say that the username is too long
         return false
     }
     else{
@@ -149,11 +166,9 @@ fun CheckUsername(username: String): Boolean {
 fun CheckPassword(password: String): Boolean {
     if (password.length < 4){
         Log.e("PasswordConstraint", "Password is too short")
-        // TODO: Call component that should say that the password is too short
         return false
     } else if (password.length > 64){
         Log.e("PasswordConstraint", "Password is too long")
-        // TODO: Call component that should say that the password is too long
         return false
     } else
         return true
