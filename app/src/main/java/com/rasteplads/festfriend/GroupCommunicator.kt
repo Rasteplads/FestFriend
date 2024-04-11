@@ -93,8 +93,9 @@ class GroupCommunicator(private val friendPosUpdater: () -> Unit){
     }
 
     fun messageID(): MessageID{
-
-        return _id.copy()
+        val id = _id.copy()
+        _id++
+        return id
     }
 
     fun body(): Body{

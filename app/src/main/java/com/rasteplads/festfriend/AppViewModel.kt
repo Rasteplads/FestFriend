@@ -76,6 +76,7 @@ class AppViewModel: ViewModel() {
         _uiState.value = _uiState.value.getFrom(position = pos)
     }
 
+    fun updateMessageType(messageType: MessageType){ com.updateMessageType(messageType) }
     fun updateUsername(username: String){ _uiState.value = _uiState.value.getFrom(username = username) }
     fun updatePassword(password: String){ _uiState.value = _uiState.value.getFrom(password = password) }
     fun updateGroupID (groupID: String){ _uiState.value = _uiState.value.getFrom(groupID = groupID)}
