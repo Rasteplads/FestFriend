@@ -21,7 +21,7 @@ fun MapPage(
     groupID: String,
     password: String,
     username: String,
-    friends: SnapshotStateMap<String, Position>,
+    friends: Friends,
     onUpdateFriendsListClick: () -> Unit,
 ){
     Column(

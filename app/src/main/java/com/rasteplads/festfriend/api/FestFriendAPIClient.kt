@@ -5,6 +5,8 @@ import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import com.rasteplads.festfriend.utils.Constants.Companion.BASE_URL
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.MainScope
 
 object FestFriendAPIClient {
     private val retrofit by lazy {
@@ -19,7 +21,7 @@ object FestFriendAPIClient {
     }
 
     fun joinGroup(groupID: UShort, username: String, password: String, error: (Int, String) -> Unit, callback: () -> Unit) {
-        GlobalScope.launch {
+        MainScope().launch {
             try {
                 val res = service.joinGroup(JoinGroupRequest(groupID, username, password))
                 if (res.isSuccessful) {
@@ -33,7 +35,7 @@ object FestFriendAPIClient {
         }
     }
     fun createGroup(username: String, password: String, error: (Int, String) -> Unit, callback: (UShort) -> Unit)  {
-        GlobalScope.launch {
+        MainScope().launch {
             try {
                 val res = service.createGroup(CreateGroupRequest(password))
                 val groupID = res.body()?.groupID
@@ -48,7 +50,7 @@ object FestFriendAPIClient {
         }
     }
     fun getMembers(groupID: UShort, password: String, error: (Int, String) -> Unit, callback: (Array<String>) -> Unit)  {
-        GlobalScope.launch {
+        MainScope().launch {
             try {
                 val res = service.getMembers(GetMembersRequest(groupID, password))
                 val members = res.body()?.members

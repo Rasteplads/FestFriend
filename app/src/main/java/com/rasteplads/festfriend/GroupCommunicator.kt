@@ -8,10 +8,10 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 data class Position(var longitude: Float, var latitude: Float)
-typealias Friends = SnapshotStateMap<String, Position>
+typealias Friends = HashMap<String, Position>
 typealias FriendNameMap = HashMap<UByte, String>
 
-class GroupCommunicator{
+class GroupCommunicator(private val friendPosUpdater: () -> Unit){
     private lateinit var _key: SecretKeySpec
     private var _myPassword: String = ""
     private var _myUsername: String = ""
@@ -30,6 +30,9 @@ class GroupCommunicator{
 
     val friends
         get () = _friends
+
+    val username
+        get () = _myUsername
 
     fun updateFriendMap(friends: Array<String>): GroupCommunicator{
         this._friends.clear()
@@ -70,6 +73,7 @@ class GroupCommunicator{
         val pos = _friends[name]
         pos?.longitude = body.longitude
         pos?.latitude = body.latitude
+        friendPosUpdater()
     }
 
     fun messageIDFromBytes(bytes: ByteArray): MessageID{
