@@ -52,3 +52,20 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: echo 'no' | ./gradlew build --scan -x test
+  build-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: sparkfabrik/android-build-action@v1.5.0
+        with:
+          project-path: app
+          output-path: FestFriend.apk
+          #browserstack-upload: true
+          #browserstack-username: ${{ secrets.BROWSERSTACK_USERNAME }}
+          #browserstack-access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          #ruby-version: "2.7.5"
+          #bundler-version: "2.3.26"
+          #fastlane-env: "debug"
+      #- uses: actions/upload-artifact@v2
+      #  with:
+      #    name: FestFriend.apk
+      #      path: JCDD/build/jcdd/lib/*
