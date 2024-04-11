@@ -11,7 +11,7 @@ import com.rasteplads.festfriend.model.Resource
 import java.lang.Exception
 
 class Repository {
-    suspend fun joinGroup(groupID: String, username: String, password: String) : Resource<JoinGroupResponse> {
+    suspend fun joinGroup(groupID: UShort, username: String, password: String) : Resource<JoinGroupResponse> {
         val joinGroupRequestElement = JoinGroupRequest(groupID, username, password)
 
         return try {
@@ -49,7 +49,7 @@ class Repository {
         }
     }
 
-    suspend fun getMembers(groupID: String, password: String) : Resource<GetMembersResponse> {
+    suspend fun getMembers(groupID: UShort, password: String) : Resource<GetMembersResponse> {
         val getMembersRequestElement = GetMembersRequest(groupID, password)
         return try {
             val response = RetrofitInstance.api.getMembers(getMembersRequestElement)

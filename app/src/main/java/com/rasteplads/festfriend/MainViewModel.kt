@@ -15,7 +15,7 @@ class MainViewModel(private val repository: Repository): ViewModel() {
     val CreateGroupResponse: MutableLiveData<Resource<CreateGroupResponse>> = MutableLiveData()
     val getGetMembersResponse: MutableLiveData<Resource<GetMembersResponse>> = MutableLiveData()
 
-    fun joinGroup(groupID: String, username: String, password: String) {
+    fun joinGroup(groupID: UShort, username: String, password: String) {
         viewModelScope.launch {
             val response = repository.joinGroup(groupID, username, password)
             JoinGroupResponse.value = response
@@ -29,7 +29,7 @@ class MainViewModel(private val repository: Repository): ViewModel() {
         }
     }
 
-    fun getMembers(groupID: String, password: String) {
+    fun getMembers(groupID: UShort, password: String) {
         viewModelScope.launch {
             val response = repository.getMembers(groupID, password)
             getGetMembersResponse.value = response
