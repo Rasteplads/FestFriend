@@ -53,7 +53,7 @@ jobs:
       - name: Build with Gradle
         run: echo 'no' | ./gradlew build --scan -x test
   create-artifacts:
-    #needs: [ build, format ]
+    needs: [ build, format ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -66,24 +66,6 @@ jobs:
           java-version: 19
       - name: Build app
         run: ./gradlew assembleDebug
-      #- uses: sparkfabrik/android-build-action@v1.5.0
-        #with:
-          #project-path: app
-          #output-path: FestFriend.apk
-          #browserstack-upload: true
-          #browserstack-username: ${{ secrets.BROWSERSTACK_USERNAME }}
-          #browserstack-access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-          #ruby-version: "2.7.5"
-          #bundler-version: "2.3.26"
-          #fastlane-env: "debug"
-      - name: LS
-        run: |
-          ls .
-          ls app/
-          ls app/build
-          ls app/build/outputs
-          ls app/build/outputs/apk
-          ls app/build/outputs/apk/debug
       - uses: actions/upload-artifact@v2
         with:
           name: FestFriendDebug.apk
