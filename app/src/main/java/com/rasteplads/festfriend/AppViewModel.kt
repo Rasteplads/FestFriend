@@ -15,6 +15,7 @@ class AppViewModel: ViewModel() {
 
     private val com: GroupCommunicator = GroupCommunicator(::friendUpdate)
     //private val eventMesh
+    //TODO: IMPLEMENT LOJDAE API
 
     private fun friendUpdate(){
         _uiState.value = _uiState.value.getFrom(friends = com.friends)
