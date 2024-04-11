@@ -56,8 +56,11 @@ jobs:
     #needs: [ build, format ]
     runs-on: ubuntu-latest
     steps:
-      #- name: Build app
-      #  run: ./gradlew assembleDebug
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+      - name: Build app
+        run: ./gradlew assembleDebug
       #- uses: sparkfabrik/android-build-action@v1.5.0
         #with:
           #project-path: app
