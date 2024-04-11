@@ -1,12 +1,14 @@
 package com.rasteplads.festfriend
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 data class Position(var longitude: Float, var latitude: Float)
-typealias Friends = HashMap<String, Position>
+typealias Friends = SnapshotStateMap<String, Position>
 typealias FriendNameMap = HashMap<UByte, String>
 
 class GroupCommunicator{

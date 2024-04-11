@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             var groupID by remember { mutableStateOf("No Group") }
-            var friends = remember { mutableStateMapOf<String, Position>()}
+            var friends = remember { groupc.friends }
             var error by remember { mutableStateOf("")}
             var isError by remember { mutableStateOf(false)}
 
@@ -49,10 +49,6 @@ class MainActivity : ComponentActivity() {
                 isError = err.first
                 error = err.second
                 err.first
-            }
-            run {
-                friends.clear()
-                friends.putAll(groupc.friends)
             }
 
             FestFriendApplication(
