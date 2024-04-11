@@ -1,0 +1,18 @@
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  build-artifacts:
+    uses: ./.github/workflows/gradle.yml
+
+    steps:
+      - name: LS
+          run: |
+            ls .
+            ls /app/
+            ls /app/build
+            ls /app/build/outputs
+            ls /app/build/outputs/apk
+            ls /app/build/outputs/apk/debug
