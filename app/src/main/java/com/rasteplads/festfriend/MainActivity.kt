@@ -1,7 +1,6 @@
 package com.rasteplads.festfriend
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,20 +35,38 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-            var groupID by remember { mutableStateOf(groupc.groupID.toString()) }
+            var groupID by remember { mutableStateOf("No Group") }
             var friends = remember { mutableStateMapOf<String, Position>()}
+            var error by remember { mutableStateOf("")}
+            var isError by remember { mutableStateOf(false)}
+
+            val fatalErrorHandler = { code: Int, msg: String ->
+                error = "Error $code: $msg"
+                isError = !isError
+            }
+
+            val errorCheck = { err: Pair<Boolean, String> ->
+                isError = err.first
+                error = err.second
+                err.first
+            }
+            run {
+                friends.clear()
+                friends.putAll(groupc.friends)
+            }
+
             FestFriendApplication(
                 groupID = groupID,
                 friends = friends,
+                isError = isError,
+                error = error,
                 onCreateButtonClick = { nav, user, pass ->
-                    FestFriendAPIClient.createGroup(user, pass, {c, m -> Log.e("FESTFRIEND $c", m)}) {id ->
-                        if (!checkUsername(user))
-                            return@createGroup
-
-                        if (!checkPassword(pass))
-                            return@createGroup
-
-                        FestFriendAPIClient.joinGroup(id, user, pass, {c, m -> Log.e("FESTFRIEND $c", m)}){
+                    if (errorCheck(isInvalidUsername(user)))
+                        return@FestFriendApplication
+                    if (errorCheck(isInvalidPassword(pass)))
+                        return@FestFriendApplication
+                    FestFriendAPIClient.createGroup(user, pass, fatalErrorHandler) { id ->
+                        FestFriendAPIClient.joinGroup(id, user, pass, fatalErrorHandler){
                             groupc.joinGroup(id, user, pass)
                             groupID = id.toString()
                             runOnUiThread{
@@ -59,12 +76,16 @@ class MainActivity : ComponentActivity() {
                     }
                 },
                 onJoinButtonClick = { nav, _groupID, user, pass ->
-                    if (!checkUsername(user) && !checkPassword(pass) && !checkGroupID(_groupID))
+                    if (errorCheck(isInvalidUsername(user)))
+                        return@FestFriendApplication
+                    if (errorCheck(isInvalidPassword(pass)))
+                        return@FestFriendApplication
+                    if (errorCheck(isInvalidGroupID(_groupID)))
                         return@FestFriendApplication
 
                     val id = _groupID.toUShort()
 
-                    FestFriendAPIClient.joinGroup(id, user, pass, {c, m -> Log.e("FESTFRIEND $c", m)}){
+                    FestFriendAPIClient.joinGroup(id, user, pass, fatalErrorHandler){
                         groupc.joinGroup(id, user, pass)
                         groupID = id.toString()
                         runOnUiThread{
@@ -75,9 +96,8 @@ class MainActivity : ComponentActivity() {
                 },
                 onUpdateFriendsListClick = {
                     friends.clear()
-                    FestFriendAPIClient.getMembers(groupc.groupID, groupc.password, {c, m -> Log.e("FESTFRIEND $c", m)}){members ->
+                    FestFriendAPIClient.getMembers(groupc.groupID, groupc.password, fatalErrorHandler){ members ->
                         groupc.updateFriendMap(members)
-                        friends.putAll(groupc.friends)
                     }
                 },
                 navController,
@@ -91,6 +111,8 @@ class MainActivity : ComponentActivity() {
 fun FestFriendApplication(
     groupID: String,
     friends: SnapshotStateMap<String, Position>,
+    isError: Boolean,
+    error: String,
     onCreateButtonClick: (NavHostController, String, String) -> Unit,
     onJoinButtonClick: (NavHostController, String, String, String) -> Unit,
     onUpdateFriendsListClick: () -> Unit,
@@ -113,6 +135,8 @@ fun FestFriendApplication(
                     CreateGroupPage(
                         username,
                         password,
+                        isError,
+                        error,
                         onUsernameChange = { username = it },
                         onPasswordChange = { password = it },
                         onCreateButtonClick = {onCreateButtonClick(navController, username, password)},
@@ -124,6 +148,8 @@ fun FestFriendApplication(
                         username,
                         userGroupID,
                         password,
+                        isError,
+                        error,
                         onGroupIDChange = { userGroupID = it },
                         onUsernameChange = { username = it },
                         onPasswordChange = { password = it },
@@ -139,34 +165,26 @@ fun FestFriendApplication(
     }
 }
 
-fun checkUsername(username: String): Boolean {
-    if(username.length < 2){
-        Log.e("UsernameConstraint", "Username is too short")
-        return true
-    }
-    else if(username.length > 64) {
-        Log.e("UsernameConstraint", "Username is too long")
-        return false
-    }
-    else{
-        return true
-    }
+fun isInvalidUsername(username: String): Pair<Boolean, String> {
+    if(username.length < 2)
+        return Pair(true, "Username is too short")
+    else if(username.length > 64)
+        return Pair(true, "Username is too long")
+    return Pair(false, "")
+
 }
 
-fun checkPassword(password: String): Boolean {
-    if (password.length < 4){
-        Log.e("PasswordConstraint", "Password is too short")
-        return false
-    } else if (password.length > 64){
-        Log.e("PasswordConstraint", "Password is too long")
-        return false
-    } else
-        return true
+fun isInvalidPassword(password: String): Pair<Boolean, String> {
+    if (password.length < 4)
+        return Pair(true, "Password is too short")
+    else if (password.length > 64)
+        return Pair(true, "Password is too long")
+    return Pair(false, "")
 }
 
-fun checkGroupID(groupID: String): Boolean {
+fun isInvalidGroupID(groupID: String): Pair<Boolean, String> {
     val error = !(groupID.isDigitsOnly() && groupID.length <=5)
     if (error)
-        Log.e("GroupIDConstraint", "GroupID contains invalid characters")
-    return error
+        return Pair(true, "GroupID is not a UShort")
+    return Pair(false, "")
 }
