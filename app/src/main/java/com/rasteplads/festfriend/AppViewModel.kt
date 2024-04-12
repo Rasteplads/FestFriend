@@ -63,7 +63,7 @@ class AppViewModel: ViewModel() {
         if (checkInput(isInvalidUsername(user)) || checkInput(isInvalidPassword(pass)))
             return
 
-        API.createGroup(user, pass, ::error){
+        API.createGroup(pass, ::error){
             com.joinGroup(it, user, pass)
             this.updateFriendsList()
             _uiState.value = _uiState.value.getFrom(groupID = it.toString())

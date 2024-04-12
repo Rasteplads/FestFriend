@@ -34,7 +34,7 @@ object FestFriendAPIClient {
             }
         }
     }
-    fun createGroup(username: String, password: String, error: (Int, String) -> Unit, callback: (UShort) -> Unit)  {
+    fun createGroup(password: String, error: (Int, String) -> Unit, callback: (UShort) -> Unit)  {
         MainScope().launch {
             try {
                 val res = service.createGroup(CreateGroupRequest(password))
