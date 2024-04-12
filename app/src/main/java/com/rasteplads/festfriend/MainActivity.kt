@@ -1,7 +1,11 @@
 package com.rasteplads.festfriend
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,11 +16,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import com.rasteplads.festfriend.repository.Repository
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
 import com.rasteplads.festfriend.model.Resource
 import com.rasteplads.festfriend.pages.CreateGroupPage
 import com.rasteplads.festfriend.pages.JoinGroupPage
@@ -27,14 +35,35 @@ import com.rasteplads.festfriend.ui.theme.FestFriendTheme
 class MainActivity : ComponentActivity() {
 
     lateinit var viewModel: MainViewModel
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val repository = Repository()
         val viewModelFactory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         setContent {
             FestFriendApplication(viewModel, this)
+        }
+    }
+
+    private fun GetLocation() {
+        val task = fusedLocationProviderClient.lastLocation
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED && ActivityCompat.
+            checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 101)
+            return
+        }
+
+        task.addOnSuccessListener {
+            if (it != null){
+                Log.d("Debug", "${it.longitude}, ${it.latitude}")
+            }
         }
     }
 }
