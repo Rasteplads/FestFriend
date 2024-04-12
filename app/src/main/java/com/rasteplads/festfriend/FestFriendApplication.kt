@@ -1,28 +1,53 @@
 package com.rasteplads.festfriend
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.rasteplads.festfriend.pages.CreateGroupPage
 import com.rasteplads.festfriend.pages.FestFriendScreen
 import com.rasteplads.festfriend.pages.JoinGroupPage
 import com.rasteplads.festfriend.pages.LandingPage
 import com.rasteplads.festfriend.pages.MapPage
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+@RequiresPermission(
+    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+)
 @Composable
 fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
 
     val appState by appViewModel.uiState.collectAsState()
     val navController = rememberNavController()
     val navToMap = {navController.navigate(FestFriendScreen.Map.name)}
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val locationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
 
     FestFriendTheme (dynamicColor = false){
         Surface(Modifier.fillMaxSize()) {
@@ -61,7 +86,18 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                 }
                 composable(FestFriendScreen.Map.name){
                     MapPage(appState.groupID, appState.password, appState.username, appState.friends,
-                        { appViewModel.updateFriendsList() })
+                        { appViewModel.updateFriendsList() }
+                    ) {
+                        scope.launch(Dispatchers.IO) {
+                            locationClient.getCurrentLocation(Priority.PRIORITY_LOW_POWER, CancellationTokenSource().token).addOnSuccessListener {
+                                if (it == null) {
+                                    Log.d("Location", "Could not find location")
+                                } else {
+                                    appViewModel.updatePosition(Position(it.longitude.toFloat(), it.latitude.toFloat()))
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

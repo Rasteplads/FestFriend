@@ -1,5 +1,6 @@
 package com.rasteplads.festfriend.pages
 
+import android.location.Location
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,13 +9,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import com.google.android.gms.tasks.Task
 import com.rasteplads.festfriend.Friends
-import com.rasteplads.festfriend.Position
 
 @Composable
 fun MapPage(
@@ -23,6 +22,7 @@ fun MapPage(
     username: String,
     friends: Friends,
     onUpdateFriendsListClick: () -> Unit,
+    onUpdateLocation: () -> Unit
 ){
     Column(
         verticalArrangement = Arrangement.Center,
@@ -48,6 +48,11 @@ fun MapPage(
             onClick = onUpdateFriendsListClick,
             modifier = Modifier.fillMaxWidth(0.8f)) {
             Text(text = "Update Friend List")
+        }
+        Button(
+            onClick = onUpdateLocation,
+            modifier = Modifier.fillMaxWidth(0.8f)) {
+            Text(text = "Update Location")
         }
     }
 }
