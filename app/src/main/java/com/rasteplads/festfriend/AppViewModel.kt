@@ -16,7 +16,7 @@ class AppViewModel: ViewModel() {
     val uiState: StateFlow<AppState> = _uiState.asStateFlow()
 
     private val com: GroupCommunicator = GroupCommunicator(::friendUpdate)
-    private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body>()
+    /*private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body>()
         .setMessageCallback(com::messageHandler)
 
         .setIDGenerator(com::messageID)
@@ -27,7 +27,7 @@ class AppViewModel: ViewModel() {
         .setIDDecodeFunction(com::messageIDFromBytes)
         .setIDEncodeFunction(com::bytesFromMessageID)
 
-        .addFilterFunction { com.groupID == it.receiverID }.build()
+        .addFilterFunction { com.groupID == it.receiverID }.build()*/
         //TODO: Find out when to execute eventmesh and integrate eventmeshdevicetransmitter
 
     private fun friendUpdate(){

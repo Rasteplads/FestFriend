@@ -1,5 +1,5 @@
 include(":eventmesh")
-project(":eventmesh").projectDir = File("C:\\repos\\event-mesh-protocol")
+project(":eventmesh").projectDir = File("./submodules/event-mesh-protocol")
 
 pluginManagement {
     repositories {
