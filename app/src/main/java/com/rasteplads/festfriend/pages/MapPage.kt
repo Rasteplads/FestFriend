@@ -1,8 +1,15 @@
 package com.rasteplads.festfriend.pages
 
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -11,13 +18,23 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import org.osmdroid.views.MapView
 import androidx.compose.ui.viewinterop.AndroidView
 import com.rasteplads.festfriend.R
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.ItemizedIconOverlay
+import org.osmdroid.views.overlay.ItemizedOverlayWithFocus
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.OverlayItem
 
 @Composable
 fun MapPage(
@@ -25,23 +42,30 @@ fun MapPage(
     password: String,
     username: String,
 ){
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Group ID: #$groupID",
-            modifier = Modifier.padding(10.dp)
-        )
-        Text(
-            text = "Password: $password",
-            modifier = Modifier.padding(10.dp)
-        )
-        Text(
-            text = "username: $username",
-            modifier = Modifier.padding(10.dp)
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Background element
+        MapView()
+        // Text on top of the image
     }
+
+    Column (horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.height(16.dp)) // Add space at the top
+
+        Box(
+            modifier = Modifier
+                .clip(shape = RoundedCornerShape(16.dp)) // Apply rounded corners with 16dp radius
+                .background(Color.Red) // Set background color for better visibility
+                .padding(16.dp) // Add some padding
+        ) {
+
+            Text(
+                text = "YOUR_CODE",
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+
 }
 
 @Composable
@@ -53,6 +77,10 @@ fun rememberMapViewWithLifecycle(): MapView {
         }
     }
 
+    //Overlay
+
+    createMarker("a", 1.0f, 2.0f, mapView)
+
     // Makes MapView follow the lifecycle of this composable
     val lifecycleObserver = rememberMapLifecycleObserver(mapView)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -62,10 +90,25 @@ fun rememberMapViewWithLifecycle(): MapView {
             lifecycle.removeObserver(lifecycleObserver)
         }
     }
+    Configuration.getInstance().setUserAgentValue("github-laurits-mumberg-myapp");
+    mapView.setTileSource(TileSourceFactory.MAPNIK)
 
     return mapView
 }
 
+fun createMarker(name: String, lat: Float, long: Float, map: MapView){
+    Log.d("Testing", "Hello")
+
+    val marker = Marker(map)
+    marker.setPosition(GeoPoint(0,0))
+    marker.setInfoWindow(null)
+    marker.textLabelFontSize = 50
+    marker.setTextIcon("Hello")
+
+    map.overlays.add(marker);
+}
+
+// Nødvendig boilerplate
 @Composable
 fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     remember(mapView) {
@@ -78,6 +121,7 @@ fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
         }
     }
 
+//Nødvendig boilerplate
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
