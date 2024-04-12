@@ -22,7 +22,6 @@ fun MapPage(
     password: String,
     username: String,
     friends: Friends,
-    onUpdateFriendsListClick: () -> Unit,
 ){
     Column(
         verticalArrangement = Arrangement.Center,
@@ -43,11 +42,6 @@ fun MapPage(
         Divider(Modifier.fillMaxWidth(0.8f) )
         for ((name, pos) in friends){
             Text(text = "$name: lat:${pos.latitude}, long: ${pos.longitude}")
-        }
-        Button(
-            onClick = onUpdateFriendsListClick,
-            modifier = Modifier.fillMaxWidth(0.8f)) {
-            Text(text = "Update Friend List")
         }
     }
 }
