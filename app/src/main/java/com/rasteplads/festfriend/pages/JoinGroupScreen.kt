@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -16,7 +17,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.rasteplads.festfriend.FestFriendScreen
 import com.rasteplads.festfriend.pages.shared.BackButton
 
 @Composable
@@ -24,6 +24,8 @@ fun JoinGroupPage(
     username: String,
     groupID: String,
     password: String,
+    isError: Boolean,
+    error: String,
     onUsernameChange: (String) -> Unit,
     onGroupIDChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -72,6 +74,8 @@ fun JoinGroupPage(
             modifier = Modifier.fillMaxWidth(0.8f)) {
             Text(text = "Join Group")
         }
+        if (isError)
+            Text(text = error, color = MaterialTheme.colorScheme.error)
         Spacer(modifier = Modifier.weight(1f))
     }
 }
