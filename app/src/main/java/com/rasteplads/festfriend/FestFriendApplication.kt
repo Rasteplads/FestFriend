@@ -3,6 +3,7 @@ package com.rasteplads.festfriend
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import com.rasteplads.festfriend.pages.JoinGroupPage
 import com.rasteplads.festfriend.pages.LandingPage
 import com.rasteplads.festfriend.pages.MapPage
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
@@ -23,7 +25,6 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
     val appState by appViewModel.uiState.collectAsState()
     val navController = rememberNavController()
     val navToMap = {navController.navigate(FestFriendScreen.Map.name)}
-
     FestFriendTheme (dynamicColor = false){
         Surface(Modifier.fillMaxSize()) {
             NavHost(navController, startDestination = FestFriendScreen.Landing.name){
@@ -60,8 +61,13 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                     )
                 }
                 composable(FestFriendScreen.Map.name){
-                    MapPage(appState.groupID, appState.password, appState.username, appState.friends,
-                        { appViewModel.updateFriendsList() })
+                    LaunchedEffect(Unit) {
+                        while (true){
+                            appViewModel.updateFriendsList()
+                            delay(5000)
+                        }
+                    }
+                    MapPage(appState.groupID, appState.password, appState.username, appState.friends)
                 }
             }
         }
