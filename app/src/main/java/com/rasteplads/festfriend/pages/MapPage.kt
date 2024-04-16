@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -32,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import org.osmdroid.views.MapView
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.view.doOnLayout
 import com.rasteplads.festfriend.R
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -42,6 +44,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.OverlayItem
 import com.rasteplads.festfriend.Friends
 import com.rasteplads.festfriend.Position
+import org.osmdroid.util.BoundingBox
 
 @Composable
 fun MapPage(
@@ -52,36 +55,10 @@ fun MapPage(
     onUpdateFriendsListClick: () -> Unit,
 ){
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background element
-        MapView()
-        // Text on top of the image
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Group ID: #$groupID",
-            modifier = Modifier.padding(10.dp)
-        )
-        Text(
-            text = "Password: $password",
-            modifier = Modifier.padding(10.dp)
-        )
-        Text(
-            text = "username: $username",
-            modifier = Modifier.padding(10.dp)
-        )
-        Divider(Modifier.fillMaxWidth(0.8f) )
-        for ((name, pos) in friends){
-            Text(text = "$name: lat:${pos.latitude}, long: ${pos.longitude}")
-        }
-        Button(
-            onClick = onUpdateFriendsListClick,
-            modifier = Modifier.fillMaxWidth(0.8f)) {
-            Text(text = "Update Friend List")
-        }
+        // Actual map
+        MapViewComp(friends)
     }
-
+    // Code at the top
     Column (horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.height(16.dp)) // Add space at the top
 
@@ -93,7 +70,7 @@ fun MapPage(
         ) {
 
             Text(
-                text = "YOUR_CODE",
+                text = groupID,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
@@ -103,7 +80,7 @@ fun MapPage(
 }
 
 @Composable
-fun rememberMapViewWithLifecycle(): MapView {
+fun rememberMapViewWithLifecycle(friends: Friends): MapView {
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
@@ -112,10 +89,22 @@ fun rememberMapViewWithLifecycle(): MapView {
     }
 
     //Overlay
+    if (friends.size >= 1) {
+        mapView.doOnLayout {
+            zoomToFriends(friends, mapView)
+        }
 
-    createMarker("a", 1.0f, 2.0f, mapView)
+    }
 
-    // Makes MapView follow the lifecycle of this composable
+    LaunchedEffect(friends) {
+        // Your function to be re-run
+        Log.d("Testing", "Launcheffect")
+        createMarkers(friends, mapView)
+    }
+
+
+
+    // Makes MapView follow the lifecycle of this composable (nej jeg ved ikke hvad det betyder)
     val lifecycleObserver = rememberMapLifecycleObserver(mapView)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
@@ -130,14 +119,41 @@ fun rememberMapViewWithLifecycle(): MapView {
     return mapView
 }
 
+fun zoomToFriends(friends: Friends, map: MapView){
+    var latMin = friends.values.first().latitude
+    var latMax = friends.values.first().latitude
+    var lngMin = friends.values.first().longitude
+    var lngMax = friends.values.first().longitude
+
+
+    for ((_, pos) in friends){
+        latMin = minOf(latMin, pos.latitude)
+        latMax = maxOf(latMax, pos.latitude)
+        lngMin = minOf(lngMin, pos.longitude)
+        lngMax = maxOf(lngMax, pos.longitude)
+    }
+
+    Log.d("Testing", BoundingBox(lngMax.toDouble(),latMin.toDouble(),lngMin.toDouble(),latMax.toDouble()).toString())
+
+    map.zoomToBoundingBox(BoundingBox(latMax.toDouble(),lngMin.toDouble(),latMin.toDouble(),lngMax.toDouble()),true,1,
+        5.0,500)
+    Log.d("Testing", "Hello: " + map.boundingBox.toString())
+
+}
+
+fun createMarkers (friends: Friends, map: MapView){
+    for ((name, pos) in friends){
+        createMarker(name, pos.latitude, pos.longitude, map)
+    }
+}
+
 fun createMarker(name: String, lat: Float, long: Float, map: MapView){
-    Log.d("Testing", "Hello")
 
     val marker = Marker(map)
-    marker.setPosition(GeoPoint(0,0))
+    marker.setPosition(GeoPoint(lat.toDouble(),long.toDouble()))
     marker.setInfoWindow(null)
     marker.textLabelFontSize = 50
-    marker.setTextIcon("Hello")
+    marker.setTextIcon(" $name ")
 
     map.overlays.add(marker);
 }
@@ -157,11 +173,12 @@ fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
 
 //Nødvendig boilerplate
 @Composable
-fun MapView(
+fun MapViewComp(
+    friends: Friends,
     modifier: Modifier = Modifier,
-    onLoad: ((map: MapView) -> Unit)? = null
+    onLoad: ((map: MapView) -> Unit)? = null,
 ) {
-    val mapViewState = rememberMapViewWithLifecycle()
+    val mapViewState = rememberMapViewWithLifecycle(friends)
 
     AndroidView(
         { mapViewState },

@@ -35,9 +35,18 @@ class AppViewModel: ViewModel() {
     }
 
     fun updateFriendsList(){
+        val fortnitePlayers = HashMap<String, Position>()
+
+        // Add some Fortnite players and their landing spots (examples)
+        fortnitePlayers["BushcamperJones"] = Position(-73.9860f, 40.7128f) // Brooklyn - Slurpy Swamp (example)
+        fortnitePlayers["PickaxePete"] = Position(-74.0060f, 40.7084f) // Manhattan - Tilted Towers (example)
+        fortnitePlayers["LootLakeLucy"] = Position(-73.9968f, 40.7484f)  // Bronx - Loot Lake (example)
+        fortnitePlayers["SupplyDropSam"]  = Position(-73.9740f, 40.7580f) // Queens - Pleasant Park (example)
+        fortnitePlayers["HighGroundHarry"] = Position(-73.9853f, 40.7676f)  // The Bronx - Salty Springs (example)
+
         API.getMembers(com.groupID, com.password, ::error){
             com.updateFriendMap(it)
-            _uiState.value = _uiState.value.getFrom(friends = com.friends)
+            _uiState.value = _uiState.value.getFrom(friends = fortnitePlayers)
         }
     }
 

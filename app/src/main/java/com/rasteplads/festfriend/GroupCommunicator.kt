@@ -1,5 +1,6 @@
 package com.rasteplads.festfriend
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import java.nio.ByteBuffer
