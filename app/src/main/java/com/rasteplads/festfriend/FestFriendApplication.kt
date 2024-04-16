@@ -1,6 +1,7 @@
 package com.rasteplads.festfriend
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.annotation.RequiresPermission
@@ -34,9 +35,7 @@ import com.rasteplads.festfriend.ui.theme.FestFriendTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@RequiresPermission(
-    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
-)
+
 @Composable
 fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
 
@@ -85,6 +84,20 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                     )
                 }
                 composable(FestFriendScreen.Map.name){
+                    if (ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        ActivityCompat.requestPermissions(
+                            context as Activity,
+                            arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                            101
+                        )
+                    }
                     MapPage(appState.groupID, appState.password, appState.username, appState.friends,
                         { appViewModel.updateFriendsList() }
                     ) {

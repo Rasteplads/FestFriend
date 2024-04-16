@@ -1,6 +1,8 @@
 package com.rasteplads.festfriend.pages
 
+import android.Manifest
 import android.location.Location
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +17,9 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.tasks.Task
 import com.rasteplads.festfriend.Friends
 
+@RequiresPermission(
+    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
+)
 @Composable
 fun MapPage(
     groupID: String,
