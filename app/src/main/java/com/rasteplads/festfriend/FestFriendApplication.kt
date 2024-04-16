@@ -36,28 +36,28 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                 }
                 composable(FestFriendScreen.CreateGroup.name){
                     CreateGroupPage(
-                        appState.username,
-                        appState.password,
-                        appState.isError,
-                        appState.error,
+                        appState,
                         onUsernameChange = { appViewModel.updateUsername(it) },
                         onPasswordChange = { appViewModel.updatePassword(it) },
                         onCreateButtonClick = { appViewModel.createGroup(navToMap) },
-                        onBackButtonClick = { navController.popBackStack() }
+                        onBackButtonClick = {
+                            navController.popBackStack()
+                            appViewModel.clearError(ErrorType.Generic)
+                        }
                     )
                 }
                 composable(FestFriendScreen.JoinGroup.name){
                     JoinGroupPage(
-                        appState.username,
-                        appState.groupID,
-                        appState.password,
-                        appState.isError,
-                        appState.error,
+                        appState,
                         onGroupIDChange = { appViewModel.updateGroupID(it) },
                         onUsernameChange = { appViewModel.updateUsername(it) },
                         onPasswordChange = { appViewModel.updatePassword(it)},
                         onJoinButtonClick = { appViewModel.joinGroup(navToMap)},
-                        onBackButtonClick = { navController.popBackStack() }
+                        onBackButtonClick = {
+                            navController.popBackStack()
+                            appViewModel.clearError(ErrorType.Generic)
+                            appViewModel.clearError(ErrorType.Group)
+                        }
                     )
                 }
                 composable(FestFriendScreen.Map.name){
@@ -67,7 +67,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                             delay(5000)
                         }
                     }
-                    MapPage(appState.groupID, appState.password, appState.username, appState.friends)
+                    MapPage(appState)
                 }
             }
         }

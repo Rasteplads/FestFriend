@@ -1,10 +1,12 @@
 package com.rasteplads.festfriend.pages
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
@@ -14,18 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import com.rasteplads.festfriend.AppState
 import com.rasteplads.festfriend.pages.shared.BackButton
 
 @Composable
 fun JoinGroupPage(
-    username: String,
-    groupID: String,
-    password: String,
-    isError: Boolean,
-    error: String,
+    appState: AppState,
     onUsernameChange: (String) -> Unit,
     onGroupIDChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -45,37 +45,56 @@ fun JoinGroupPage(
         )
         Spacer(modifier = Modifier.weight(0.2f))
         TextField(
-            value = username,
+            value = appState.username,
             onValueChange = onUsernameChange,
-            placeholder = { Text("Username") },
+            label = { Text("Username") },
+            singleLine = true,
+            isError = appState.usernameError.isError,
             modifier = Modifier
-                .padding(bottom = 15.dp)
                 .fillMaxWidth(0.8f)
         )
-        Divider(Modifier.fillMaxWidth(0.8f) )
+        if (appState.usernameError.isError)
+            Text(text = appState.usernameError.msg, color = MaterialTheme.colorScheme.error)
+
+        Divider(Modifier.fillMaxWidth(0.8f).padding(top = 15.dp) )
         TextField(
-            value = groupID,
+            value = appState.groupID,
             onValueChange = onGroupIDChange,
-            placeholder = { Text("Group ID") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            label = { Text("Group ID") },
+            singleLine = true,
+            isError = appState.groupIDError.isError,
             modifier = Modifier
-                .padding(bottom = 15.dp, top = 15.dp)
+                .padding(top = 15.dp)
                 .fillMaxWidth(0.8f)
         )
+        if (appState.groupIDError.isError)
+            Text(text = appState.groupIDError.msg, color = MaterialTheme.colorScheme.error)
+
         TextField(
-            value = password,
+            value =  appState.password,
             onValueChange = onPasswordChange,
-            placeholder = { Text("Group Password") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            label = { Text("Group Password") },
+            singleLine = true,
+            isError = appState.passwordError.isError,
             modifier = Modifier
-                .padding(bottom = 15.dp)
+                .padding(top = 15.dp)
                 .fillMaxWidth(0.8f)
         )
+        if (appState.passwordError.isError)
+            Text(text = appState.passwordError.msg, color = MaterialTheme.colorScheme.error)
+
         Button(
             onClick = onJoinButtonClick,
-            modifier = Modifier.fillMaxWidth(0.8f)) {
+            modifier = Modifier.fillMaxWidth(0.8f).padding(top = 15.dp)) {
             Text(text = "Join Group")
         }
-        if (isError)
-            Text(text = error, color = MaterialTheme.colorScheme.error)
+
+        if (appState.genericError.isError)
+            Text(text = appState.genericError.msg, color = MaterialTheme.colorScheme.error)
+
         Spacer(modifier = Modifier.weight(1f))
     }
 }
