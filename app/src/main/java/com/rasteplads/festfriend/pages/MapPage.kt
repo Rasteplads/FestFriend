@@ -52,7 +52,6 @@ fun MapPage(
     password: String,
     username: String,
     friends: Friends,
-    onUpdateFriendsListClick: () -> Unit,
 ){
     Box(modifier = Modifier.fillMaxSize()) {
         // Actual map

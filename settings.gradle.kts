@@ -1,3 +1,6 @@
+include(":eventmesh")
+project(":eventmesh").projectDir = File("./submodules/event-mesh-protocol")
+
 pluginManagement {
     repositories {
         google {
@@ -12,12 +15,13 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    //repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
     }
 }
+
 
 rootProject.name = "FestFriend"
 include(":app")

@@ -44,6 +44,7 @@ class GroupCommunicator(private val friendPosUpdater: () -> Unit){
                 _id.userID = index.toUByte()
                 return@forEachIndexed
             }
+
             _friendMap[index.toUByte()] = friend
             this._friends[friend] = Position(0f, 0f)
         }
@@ -70,7 +71,13 @@ class GroupCommunicator(private val friendPosUpdater: () -> Unit){
     }
 
     fun messageHandler(messageID: MessageID, body: Body){
-        val name = _friendMap[messageID.userID]
+        val friendID = messageID.userID
+        val name = _friendMap[friendID] ?: friendID.toString()
+
+        if (!_friends.containsKey(name))
+            _friends[name] = Position(0f, 0f)
+
+
         val pos = _friends[name]
         pos?.longitude = body.longitude
         pos?.latitude = body.latitude
