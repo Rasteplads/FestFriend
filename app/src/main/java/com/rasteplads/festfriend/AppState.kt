@@ -1,5 +1,7 @@
 package com.rasteplads.festfriend
 
+
+data class InputError(val isError: Boolean = false, val msg: String = "")
 data class AppState (
     val groupID: String = "",
     val password: String = "",
@@ -9,8 +11,10 @@ data class AppState (
 
     val friends: Friends = Friends(),
 
-    val error: String = "",
-    val isError: Boolean = false
+    val usernameError: InputError = InputError(),
+    val passwordError: InputError = InputError(),
+    val groupIDError: InputError = InputError(),
+    val genericError: InputError = InputError()
 ){
     fun getFrom(
         groupID: String = this.groupID,
@@ -18,10 +22,12 @@ data class AppState (
         username: String = this.username,
         position: Position = this.position,
         friends: Friends = this.friends,
-        error: String = this.error,
-        isError: Boolean = this.isError
+        usernameError: InputError = this.usernameError,
+        passwordError: InputError = this.passwordError,
+        groupIDError: InputError = this.groupIDError,
+        genericError: InputError = this.genericError
 
-    ): AppState{
-        return AppState(groupID, password, username, position, friends, error, isError)
+        ): AppState{
+        return AppState(groupID, password, username, position, friends, usernameError, passwordError, groupIDError, genericError)
     }
 }

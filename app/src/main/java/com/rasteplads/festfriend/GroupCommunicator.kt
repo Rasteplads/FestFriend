@@ -171,7 +171,7 @@ class Body(
     }
 
     override fun toString(): String {
-        return "Message(type=$type, longitude=$longitude, latitude=$latitude)"
+        return "Body(type=$type, longitude=$longitude, latitude=$latitude)"
     }
 
     companion object {
