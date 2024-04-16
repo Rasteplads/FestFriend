@@ -1,21 +1,35 @@
 package com.rasteplads.festfriend
 
+import android.util.Log
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.rasteplads.festfriend.api.FestFriendAPIClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import rasteplads.api.EventMesh
 
 typealias API = FestFriendAPIClient
+typealias FestFriendMesh = EventMesh<MessageID, Body>
 
 class AppViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(AppState())
     val uiState: StateFlow<AppState> = _uiState.asStateFlow()
 
     private val com: GroupCommunicator = GroupCommunicator(::friendUpdate)
-    //private val eventMesh
-    //TODO: IMPLEMENT LOJDAE API
+    /*private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body>()
+        .setMessageCallback(com::messageHandler)
+
+        .setIDGenerator(com::messageID)
+        .setDataGenerator(com::body)
+
+        .setDataDecodeFunction(com::bodyFromBytes)
+        .setDataEncodeFunction(com::bytesFromBody)
+        .setIDDecodeFunction(com::messageIDFromBytes)
+        .setIDEncodeFunction(com::bytesFromMessageID)
+
+        .addFilterFunction { com.groupID == it.receiverID }.build()*/
+        //TODO: Find out when to execute eventmesh and integrate eventmeshdevicetransmitter
 
     private fun friendUpdate(){
         _uiState.value = _uiState.value.getFrom(friends = com.friends)
@@ -67,11 +81,12 @@ class AppViewModel: ViewModel() {
             com.joinGroup(it, user, pass)
             this.updateFriendsList()
             _uiState.value = _uiState.value.getFrom(groupID = it.toString())
-            uiHandler()
+            joinGroup(uiHandler)
         }
     }
 
     fun updatePosition(pos: Position){
+        Log.d("Debug", "${pos.latitude}, ${pos.longitude}")
         com.updatePosition(pos)
         _uiState.value = _uiState.value.getFrom(position = pos)
     }

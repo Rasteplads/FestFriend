@@ -8,6 +8,7 @@ import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import com.rasteplads.festfriend.ui.theme.FestFriendTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.delay
 
 @Composable
 fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
@@ -43,7 +45,6 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
     val navController = rememberNavController()
     val navToMap = {navController.navigate(FestFriendScreen.Map.name)}
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val locationClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
@@ -95,13 +96,13 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                         ActivityCompat.requestPermissions(
                             context as Activity,
                             arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
-                            101
-                        )
+                            101)
                     }
                     MapPage(appState.groupID, appState.password, appState.username, appState.friends,
-                        { appViewModel.updateFriendsList() }
-                    ) {
-                        scope.launch(Dispatchers.IO) {
+                        { appViewModel.updateFriendsList() })
+                    LaunchedEffect(Unit) {
+                        while (true){
+                            appViewModel.updateFriendsList()
                             locationClient.getCurrentLocation(Priority.PRIORITY_LOW_POWER, CancellationTokenSource().token).addOnSuccessListener {
                                 if (it == null) {
                                     Log.d("Location", "Could not find location")
@@ -109,6 +110,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                                     appViewModel.updatePosition(Position(it.longitude.toFloat(), it.latitude.toFloat()))
                                 }
                             }
+                            delay(5000)
                         }
                     }
                 }
