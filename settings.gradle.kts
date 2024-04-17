@@ -14,6 +14,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     //repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -22,6 +23,11 @@ dependencyResolutionManagement {
     }
 }
 
+sourceControl {
+    gitRepository(uri("https://github.com/Rasteplads/event-mesh-protocol.git")) {
+        producesModule("rasteplads:event-mesh-protocol")
+    }
+}
 
 rootProject.name = "FestFriend"
 include(":app")

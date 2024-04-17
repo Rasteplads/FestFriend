@@ -4,13 +4,6 @@ plugins {
     id("com.diffplug.spotless") version "6.19.0"
 }
 
-sourceControl {
-    gitRepository(uri("https://github.com/Rasteplads/event-mesh-protocol.git")) {
-        producesModule("org.rasteplads:event-mesh-protocol")
-    }
-}
-
-
 android {
     namespace = "com.rasteplads.festfriend"
     compileSdk = 34
@@ -82,7 +75,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.6.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(project(":eventmesh"))
-    implementation("org.rasteplads:event-mesh-protocol")
+    implementation("rasteplads:event-mesh-protocol")
 }
 
 spotless {
