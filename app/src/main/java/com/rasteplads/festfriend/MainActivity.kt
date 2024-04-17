@@ -3,7 +3,7 @@ package com.rasteplads.festfriend
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import org.rasteplads.api.*
+import rasteplads.api.*
 
 
 class MainActivity : ComponentActivity() {
