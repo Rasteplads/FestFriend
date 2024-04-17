@@ -1,10 +1,13 @@
 package com.rasteplads.festfriend.pages
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -12,8 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.materialIcon
+import androidx.compose.material.icons.sharp.MailOutline
+import androidx.compose.material.icons.sharp.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.snapshots.SnapshotStateMap
@@ -23,16 +32,26 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import org.osmdroid.views.MapView
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.doOnLayout
 import com.rasteplads.festfriend.R
 import org.osmdroid.config.Configuration
@@ -58,25 +77,40 @@ fun MapPage(
         MapViewComp(friends)
     }
     // Code at the top
+    GroupIdDisplay(groupID = groupID)
+}
+
+@Composable
+fun GroupIdDisplay(groupID: String) {
     Column (horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.height(16.dp)) // Add space at the top
 
+        val clipboardManager = LocalClipboardManager.current
+        val copyToast = Toast.makeText(LocalContext.current, "Copied to clipboard", Toast.LENGTH_SHORT)
         Box(
             modifier = Modifier
                 .clip(shape = RoundedCornerShape(16.dp)) // Apply rounded corners with 16dp radius
-                .background(Color.Red) // Set background color for better visibility
+                .background(Color.White) // Set background color for better visibility
+                .clickable(onClick = {
+                    clipboardManager.setText(AnnotatedString(groupID))
+                    copyToast.show()
+                })
                 .padding(16.dp) // Add some padding
         ) {
 
-            Text(
-                text = groupID,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "$groupID ",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+                Icon(imageVector = Icons.Sharp.Send, contentDescription = "Copy", tint = Color.Black)
+            }
         }
     }
-
 }
+
 
 @Composable
 fun rememberMapViewWithLifecycle(friends: Friends): MapView {
@@ -87,17 +121,22 @@ fun rememberMapViewWithLifecycle(friends: Friends): MapView {
         }
     }
 
-    //Overlay
-    if (friends.size >= 1) {
-        mapView.doOnLayout {
-            zoomToFriends(friends, mapView)
-        }
-
-    }
+    var hasZoomed by remember { mutableStateOf(false) }
 
     LaunchedEffect(friends) {
-        // Your function to be re-run
-        Log.d("Testing", "Launcheffect")
+        //Overlay
+        if (friends.size >= 1 && !hasZoomed) {
+            mapView.doOnLayout {
+                zoomToFriends(friends, mapView)
+            }
+            hasZoomed = true;
+        }
+    }
+
+
+
+    // Updates markers when there are changes to friends
+    LaunchedEffect(friends) {
         createMarkers(friends, mapView)
     }
 
@@ -124,37 +163,44 @@ fun zoomToFriends(friends: Friends, map: MapView){
     var lngMin = friends.values.first().longitude
     var lngMax = friends.values.first().longitude
 
-
     for ((_, pos) in friends){
         latMin = minOf(latMin, pos.latitude)
         latMax = maxOf(latMax, pos.latitude)
         lngMin = minOf(lngMin, pos.longitude)
         lngMax = maxOf(lngMax, pos.longitude)
     }
+    // The space between the most outer friends and the bounding box
+    val zoomPadding = 0.001
 
-    Log.d("Testing", BoundingBox(lngMax.toDouble(),latMin.toDouble(),lngMin.toDouble(),latMax.toDouble()).toString())
-
-    map.zoomToBoundingBox(BoundingBox(latMax.toDouble(),lngMin.toDouble(),latMin.toDouble(),lngMax.toDouble()),true,1,
-        5.0,500)
+    map.zoomToBoundingBox(BoundingBox(latMax.toDouble() + zoomPadding,lngMax.toDouble() + zoomPadding,latMin.toDouble() - zoomPadding,lngMin.toDouble() - zoomPadding),false,1,
+        1000.0,500)
     Log.d("Testing", "Hello: " + map.boundingBox.toString())
 
 }
 
 fun createMarkers (friends: Friends, map: MapView){
+    map.overlays.clear()
+    var counter = 0
     for ((name, pos) in friends){
-        createMarker(name, pos.latitude, pos.longitude, map)
+        createMarker(name, pos.latitude, pos.longitude, map, counter++)
     }
 }
 
-fun createMarker(name: String, lat: Float, long: Float, map: MapView){
+fun createMarker(name: String, lat: Float, long: Float, map: MapView, counter: Int) {
 
     val marker = Marker(map)
     marker.setPosition(GeoPoint(lat.toDouble(),long.toDouble()))
     marker.setInfoWindow(null)
+    marker.textLabelBackgroundColor = getMarkerColor(counter)
     marker.textLabelFontSize = 50
     marker.setTextIcon(" $name ")
 
     map.overlays.add(marker);
+}
+
+fun getMarkerColor(friendNumber: Int): Int {
+    // Uses Hue, Saturation and Luminosity. Cycles through hues.
+    return ColorUtils.HSLToColor(floatArrayOf((friendNumber * 100f) % 360,1f,0.7f))
 }
 
 // Nødvendig boilerplate

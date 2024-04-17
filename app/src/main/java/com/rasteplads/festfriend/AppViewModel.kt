@@ -1,5 +1,6 @@
 package com.rasteplads.festfriend
 
+import android.util.Log
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.rasteplads.festfriend.api.FestFriendAPIClient
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import rasteplads.api.EventMesh
+import kotlin.random.Random
 
 typealias API = FestFriendAPIClient
 typealias FestFriendMesh = EventMesh<MessageID, Body>
@@ -49,9 +51,10 @@ class AppViewModel: ViewModel() {
 
     fun updateFriendsList(){
         val fortnitePlayers = HashMap<String, Position>()
+        val randomFloat = Random.nextFloat() * (0.1 - (-0.1)) + (-0.1)
 
         // Add some Fortnite players and their landing spots (examples)
-        fortnitePlayers["BushcamperJones"] = Position(-73.9860f, 40.7128f) // Brooklyn - Slurpy Swamp (example)
+        fortnitePlayers["BushcamperJones"] = Position(-73.9860f + randomFloat.toFloat(), 40.7128f) // Brooklyn - Slurpy Swamp (example)
         fortnitePlayers["PickaxePete"] = Position(-74.0060f, 40.7084f) // Manhattan - Tilted Towers (example)
         fortnitePlayers["LootLakeLucy"] = Position(-73.9968f, 40.7484f)  // Bronx - Loot Lake (example)
         fortnitePlayers["SupplyDropSam"]  = Position(-73.9740f, 40.7580f) // Queens - Pleasant Park (example)
