@@ -117,12 +117,10 @@ class GroupCommunicatorTest {
         com.joinGroup(55u, "john", "pass")
         com.updateFriendMap(arrayOf("alice", "bob", "john"))
 
-        val key = getKey("55pass")
 
         val id = MessageID(55.toUShort(), userID = 2.toUByte())
-        val expectedBytes = encrypt(key, id.toByteArray())
+        val expectedBytes = id.toByteArray()
         val actualBytes = com.bytesFromMessageID(com.messageID())
-
 
         assertArrayEquals(
             expectedBytes.toTypedArray(),

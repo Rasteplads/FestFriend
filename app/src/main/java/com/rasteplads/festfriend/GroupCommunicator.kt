@@ -86,11 +86,11 @@ class GroupCommunicator(
     }
 
     fun messageIDFromBytes(bytes: ByteArray): MessageID{
-        return MessageID.fromByteArray(decrypt(_key, bytes))
+        return MessageID.fromByteArray(bytes)
     }
 
     fun bytesFromMessageID(messageID: MessageID): ByteArray{
-        return encrypt(_key, messageID.toByteArray())
+        return messageID.toByteArray()
     }
 
     fun bodyFromBytes(bytes: ByteArray): Body{
