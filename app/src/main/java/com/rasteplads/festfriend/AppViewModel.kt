@@ -1,6 +1,5 @@
 package com.rasteplads.festfriend
 
-import android.util.Log
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.rasteplads.festfriend.api.FestFriendAPIClient
@@ -86,7 +85,6 @@ class AppViewModel: ViewModel() {
     }
 
     fun updatePosition(pos: Position){
-        Log.d("Debug", "${pos.latitude}, ${pos.longitude}")
         com.updatePosition(pos)
         _uiState.value = _uiState.value.getFrom(position = pos)
     }
