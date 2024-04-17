@@ -25,7 +25,7 @@ dependencyResolutionManagement {
 
 sourceControl {
     gitRepository(uri("https://github.com/Rasteplads/event-mesh-protocol.git")) {
-        producesModule("org.rasteplads:event-mesh-protocol")
+        producesModule("rasteplads:event-mesh-protocol")
     }
 }
 
