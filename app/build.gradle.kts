@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.rasteplads.festfriend"
-        minSdk = 24
+        minSdk = 31
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -41,7 +41,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.9.23"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
     packaging {
         resources {
