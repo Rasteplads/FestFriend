@@ -1,5 +1,6 @@
 package com.rasteplads.festfriend.pages
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.Send
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,20 +48,19 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import com.rasteplads.festfriend.Friends
+import com.rasteplads.festfriend.Position
 import org.osmdroid.util.BoundingBox
 
 @Composable
 fun MapPage(
     appState: AppState,
-    groupID: String,
-    friends: Friends,
 ){
     Box(modifier = Modifier.fillMaxSize()) {
         // Actual map
-        MapViewComp(friends)
+        MapViewComp(appState)
     }
     // Code at the top
-    GroupIdDisplay(groupID = groupID)
+    GroupIdDisplay(groupID = appState.groupID)
 }
 
 @Composable
@@ -72,7 +73,7 @@ fun GroupIdDisplay(groupID: String) {
         Box(
             modifier = Modifier
                 .clip(shape = RoundedCornerShape(16.dp))
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.primary)
                 // Copy the code to clipboard when clicking
                 .clickable(onClick = {
                     clipboardManager.setText(AnnotatedString(groupID))
@@ -84,11 +85,11 @@ fun GroupIdDisplay(groupID: String) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "$groupID ",
-                    color = Color.Black,
+                    color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
-                Icon(imageVector = Icons.Sharp.Send, contentDescription = "Copy", tint = Color.Black)
+                Icon(imageVector = Icons.Sharp.Send, contentDescription = "Copy", tint = Color.White)
             }
         }
     }
@@ -96,7 +97,9 @@ fun GroupIdDisplay(groupID: String) {
 
 
 @Composable
-fun rememberMapViewWithLifecycle(friends: Friends): MapView {
+fun rememberMapViewWithLifecycle(appState: AppState): MapView {
+    val friends = appState.friends
+    Log.d("Testt", friends.toString())
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
@@ -106,10 +109,12 @@ fun rememberMapViewWithLifecycle(friends: Friends): MapView {
 
     // Changes map bounding box to friends
     var hasZoomed by remember { mutableStateOf(false) }
+    Log.d("Test", "Friends: " + friends.toString())
     LaunchedEffect(friends) {
-        if (friends.size >= 1 && !hasZoomed) {
+        if (!hasZoomed) {
             mapView.doOnLayout {
-                zoomToFriends(friends, mapView)
+                Log.d("Test", "Here")
+                zoomToFriends(appState.position, friends, mapView)
             }
             hasZoomed = true;
         }
@@ -117,7 +122,7 @@ fun rememberMapViewWithLifecycle(friends: Friends): MapView {
 
     // Updates markers when there are changes to friends
     LaunchedEffect(friends) {
-        createMarkers(friends, mapView)
+        createMarkers(appState.username, appState.position, friends, mapView)
     }
 
     // Makes MapView follow the lifecycle of this composable (nej jeg ved ikke hvad det betyder)
@@ -135,11 +140,15 @@ fun rememberMapViewWithLifecycle(friends: Friends): MapView {
     return mapView
 }
 
-fun zoomToFriends(friends: Friends, map: MapView){
-    var latMin = friends.values.first().latitude
-    var latMax = friends.values.first().latitude
-    var lngMin = friends.values.first().longitude
-    var lngMax = friends.values.first().longitude
+fun zoomToFriends(myPosition: Position, friends: Friends, map: MapView){
+    // Instantiate to default (your position)
+    var latMin = myPosition.latitude
+    var latMax = myPosition.latitude
+    var lngMin = myPosition.longitude
+    var lngMax = myPosition.longitude
+
+    Log.d("Test", "Zooming")
+    Log.d("Test", latMin.toString())
 
     for ((_, pos) in friends){
         latMin = minOf(latMin, pos.latitude)
@@ -154,9 +163,12 @@ fun zoomToFriends(friends: Friends, map: MapView){
         1000.0,500)
 }
 
-fun createMarkers (friends: Friends, map: MapView){
+fun createMarkers (username: String, myPosition: Position, friends: Friends, map: MapView){
     map.overlays.clear()
-    var counter = 0
+
+    createMarker(username, myPosition.latitude, myPosition.longitude, map, 0)
+
+    var counter = 1
     for ((name, pos) in friends){
         createMarker(name, pos.latitude, pos.longitude, map, counter++)
     }
@@ -195,11 +207,11 @@ fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
 //Nødvendig boilerplate
 @Composable
 fun MapViewComp(
-    friends: Friends,
+    appState: AppState,
     modifier: Modifier = Modifier,
     onLoad: ((map: MapView) -> Unit)? = null,
 ) {
-    val mapViewState = rememberMapViewWithLifecycle(friends)
+    val mapViewState = rememberMapViewWithLifecycle(appState)
 
     AndroidView(
         { mapViewState },
