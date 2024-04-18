@@ -1,6 +1,5 @@
 package com.rasteplads.festfriend
 
-import android.util.Log
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.rasteplads.festfriend.api.FestFriendAPIClient
@@ -9,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import rasteplads.api.EventMesh
-import kotlin.random.Random
 
 typealias API = FestFriendAPIClient
 typealias FestFriendMesh = EventMesh<MessageID, Body>
