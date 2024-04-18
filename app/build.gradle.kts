@@ -74,6 +74,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.6.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(project(":eventmesh"))
 }
