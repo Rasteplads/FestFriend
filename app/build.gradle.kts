@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.foundation.layout.android)
     testImplementation(libs.junit)
+    testImplementation("io.mockk:mockk:1.13.10")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
