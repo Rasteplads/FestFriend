@@ -7,6 +7,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.rasteplads.festfriend.utils.Constants.Companion.BASE_URL
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.MainScope
+import org.json.JSONException
+import org.json.JSONObject
+import retrofit2.Response
 
 object FestFriendAPIClient {
     private val retrofit by lazy {
@@ -28,7 +31,7 @@ object FestFriendAPIClient {
                     callback()
                     return@launch
                 }
-                error(res.code(), res.message())
+                error(res.code(), getMsg(res))
             } catch (e: Exception) {
                 error(-1, e.message ?: "Unknown error")
             }
@@ -43,7 +46,7 @@ object FestFriendAPIClient {
                     callback(groupID)
                     return@launch
                 }
-                error(res.code(), res.message())
+                error(res.code(), getMsg(res))
             }catch (e: Exception){
                 error(-1, e.message ?: "Unknown error")
             }
@@ -58,10 +61,19 @@ object FestFriendAPIClient {
                     callback(members)
                     return@launch
                 }
-                error(res.code(), res.message())
+                error(res.code(), getMsg(res))
             } catch (e: Exception) {
                 error(-1, e.message ?: "Unknown error")
             }
         }
+    }
+
+    private fun <T> getMsg(res: Response<T>): String{
+       return try {
+           JSONObject(res.errorBody()?.string() ?: "")
+               .getString("detail")
+       } catch (e: JSONException) {
+           res.message()
+       }
     }
 }

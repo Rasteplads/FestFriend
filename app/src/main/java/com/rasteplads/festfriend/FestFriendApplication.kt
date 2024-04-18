@@ -37,7 +37,7 @@ import kotlinx.coroutines.delay
 enum class JoinOrCreate { Join, Create, None }
 
 @Composable
-fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
+fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
 
     val appState by appViewModel.uiState.collectAsState()
     val navController = rememberNavController()
@@ -75,19 +75,16 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
 
     FestFriendTheme(dynamicColor = false) {
         Surface(Modifier.fillMaxSize()) {
-            NavHost(navController, startDestination = FestFriendScreen.Landing.name) {
-                composable(FestFriendScreen.Landing.name) {
+            NavHost(navController, startDestination = FestFriendScreen.Landing.name){
+                composable(FestFriendScreen.Landing.name){
                     LandingPage(
-                        onCreateButtonClick = { navController.navigate(FestFriendScreen.CreateGroup.name) },
-                        onJoinButtonClick = { navController.navigate(FestFriendScreen.JoinGroup.name) }
+                        onCreateButtonClick = {navController.navigate(FestFriendScreen.CreateGroup.name)},
+                        onJoinButtonClick = {navController.navigate(FestFriendScreen.JoinGroup.name)}
                     )
                 }
-                composable(FestFriendScreen.CreateGroup.name) {
+                composable(FestFriendScreen.CreateGroup.name){
                     CreateGroupPage(
-                        appState.username,
-                        appState.password,
-                        appState.isError,
-                        appState.error,
+                        appState,
                         onUsernameChange = { appViewModel.updateUsername(it) },
                         onPasswordChange = { appViewModel.updatePassword(it) },
                         onCreateButtonClick = {
@@ -98,16 +95,15 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                                 action = JoinOrCreate.Create
                                 locationPermissionLauncher.launch(permission)
                             }},
-                        onBackButtonClick = { navController.popBackStack() }
+                        onBackButtonClick = {
+                            navController.popBackStack()
+                            appViewModel.clearError(ErrorType.Generic)
+                        }
                     )
                 }
                 composable(FestFriendScreen.JoinGroup.name) {
                     JoinGroupPage(
-                        appState.username,
-                        appState.groupID,
-                        appState.password,
-                        appState.isError,
-                        appState.error,
+                        appState,
                         onGroupIDChange = { appViewModel.updateGroupID(it) },
                         onUsernameChange = { appViewModel.updateUsername(it) },
                         onPasswordChange = { appViewModel.updatePassword(it) },
@@ -119,15 +115,14 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                                 action = JoinOrCreate.Join
                                 locationPermissionLauncher.launch(permission)
                             }},
-                        onBackButtonClick = { navController.popBackStack() }
+                        onBackButtonClick = {
+                            navController.popBackStack()
+                            appViewModel.clearError(ErrorType.Generic)
+                            appViewModel.clearError(ErrorType.Group)
+                        }
                     )
                 }
-                composable(FestFriendScreen.Map.name) {
-                    MapPage(appState.groupID,
-                        appState.password,
-                        appState.username,
-                        appState.friends,
-                        { appViewModel.updateFriendsList() })
+                composable(FestFriendScreen.Map.name){
                     LaunchedEffect(Unit) {
                         while (true) {
                             appViewModel.updateFriendsList()
@@ -149,6 +144,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                             delay(5000)
                         }
                     }
+                    MapPage(appState)
                 }
             }
         }

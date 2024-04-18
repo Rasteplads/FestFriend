@@ -11,6 +11,13 @@ import rasteplads.api.EventMesh
 typealias API = FestFriendAPIClient
 typealias FestFriendMesh = EventMesh<MessageID, Body>
 
+enum class ErrorType() {
+    User,
+    Pass,
+    Group,
+    Generic
+}
+
 class AppViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(AppState())
     val uiState: StateFlow<AppState> = _uiState.asStateFlow()
@@ -34,49 +41,73 @@ class AppViewModel: ViewModel() {
         _uiState.value = _uiState.value.getFrom(friends = com.friends)
     }
 
-    private fun error(code: Int, msg: String){
-        val error = "Error $code: $msg"
-        val isError = true
-        _uiState.value = _uiState.value.getFrom(error= error, isError = isError)
+    private fun serverError(code: Int, msg: String){
+        updateInputError(ErrorType.Generic, true, msg)
     }
 
-    private fun checkInput(err: Pair<Boolean, String>): Boolean{
-        val isError = err.first
-        val error = err.second
-        _uiState.value = _uiState.value.getFrom(error= error, isError = isError)
-        return err.first
+    fun clearError(errorType: ErrorType){
+        updateInputError(errorType, false, "")
+    }
+    private fun updateInputError(errorType: ErrorType, isError: Boolean, msg: String){
+        val error = InputError(isError, msg)
+        when(errorType){
+            ErrorType.User -> _uiState.value = _uiState.value.getFrom(usernameError = error)
+            ErrorType.Pass -> _uiState.value = _uiState.value.getFrom(passwordError = error)
+            ErrorType.Group -> _uiState.value = _uiState.value.getFrom(groupIDError = error)
+            ErrorType.Generic -> _uiState.value = _uiState.value.getFrom(genericError = error)
+        }
+
+    }
+
+    private fun isInputError(): Boolean {
+        val pass = _uiState.value.passwordError.isError
+        val user = _uiState.value.usernameError.isError
+        val group = _uiState.value.groupIDError.isError
+        val generic = _uiState.value.genericError.isError
+        return pass || user || group || generic
     }
 
     fun updateFriendsList(){
-        API.getMembers(com.groupID, com.password, ::error){
+        API.getMembers(com.groupID, com.password, ::serverError){
             com.updateFriendMap(it)
             _uiState.value = _uiState.value.getFrom(friends = com.friends)
         }
     }
 
     fun joinGroup(uiHandler: () -> Unit = {}){
-        val groupID = _uiState.value.groupID.toUShort()
+        clearError(ErrorType.Generic)
+        val groupID = _uiState.value.groupID
         val user = _uiState.value.username
         val pass = _uiState.value.password
 
-        if (checkInput(isInvalidGroupID(_uiState.value.groupID)) || checkInput(isInvalidUsername(user)) || checkInput(isInvalidPassword(pass)))
+        updateGroupID(groupID)
+        updateUsername(user)
+        updatePassword(pass)
+
+        if(isInputError())
             return
 
-        API.joinGroup(groupID, user, pass, ::error){
-            com.joinGroup(groupID, user, pass)
+        val id = groupID.toUShort()
+
+        API.joinGroup(id, user, pass, ::serverError){
+            com.joinGroup(id, user, pass)
             this.updateFriendsList()
             uiHandler()
         }
     }
 
     fun createGroup(uiHandler: () -> Unit = {}){
+        clearError(ErrorType.Generic)
         val user = _uiState.value.username
         val pass = _uiState.value.password
 
-        if (checkInput(isInvalidUsername(user)) || checkInput(isInvalidPassword(pass)))
+        updateUsername(user)
+        updatePassword(pass)
+
+        if (isInputError())
             return
 
-        API.createGroup(pass, ::error){
+        API.createGroup(pass, ::serverError){
             com.joinGroup(it, user, pass)
             this.updateFriendsList()
             _uiState.value = _uiState.value.getFrom(groupID = it.toString())
@@ -90,31 +121,42 @@ class AppViewModel: ViewModel() {
     }
 
     fun updateMessageType(messageType: MessageType){ com.updateMessageType(messageType) }
-    fun updateUsername(username: String){ _uiState.value = _uiState.value.getFrom(username = username) }
-    fun updatePassword(password: String){ _uiState.value = _uiState.value.getFrom(password = password) }
-    fun updateGroupID (groupID: String){ _uiState.value = _uiState.value.getFrom(groupID = groupID)}
-}
+    fun updateUsername(username: String){
+        clearError(ErrorType.User,)
+        if (username.length < 4)
+            updateInputError(ErrorType.User, true, "Username is too short")
+        if (username.length > 64)
+            updateInputError(ErrorType.User, true, "Username is too long")
 
-fun isInvalidUsername(username: String): Pair<Boolean, String> {
-    if(username.length < 2)
-        return Pair(true, "Username is too short")
-    else if(username.length > 64)
-        return Pair(true, "Username is too long")
-    return Pair(false, "")
+        _uiState.value = _uiState.value.getFrom(username = username)
+    }
+    fun updatePassword(password: String){
+        clearError(ErrorType.Pass)
 
-}
+        if (password.length < 4)
+            updateInputError(ErrorType.Pass, true, "Password is too short")
+        if (password.length > 64)
+            updateInputError(ErrorType.Pass, true, "Password is too long")
 
-fun isInvalidPassword(password: String): Pair<Boolean, String> {
-    if (password.length < 4)
-        return Pair(true, "Password is too short")
-    else if (password.length > 64)
-        return Pair(true, "Password is too long")
-    return Pair(false, "")
-}
 
-fun isInvalidGroupID(groupID: String): Pair<Boolean, String> {
-    val error = !(groupID.isDigitsOnly() && groupID.length <=5)
-    if (error)
-        return Pair(true, "GroupID is not a UShort")
-    return Pair(false, "")
+        _uiState.value = _uiState.value.getFrom(password = password)
+    }
+    fun updateGroupID (groupID: String){
+        clearError(ErrorType.Group)
+
+        if (!groupID.isDigitsOnly())
+            return
+
+        var id = groupID
+        if (id.length > 5)
+            id = id.substring(0, id.length - 1)
+
+        try {
+            groupID.toUShort()
+        } catch (e: NumberFormatException){
+            updateInputError(ErrorType.Group, true, "GroupID is not a valid representation of a UShort")
+        }
+
+        _uiState.value = _uiState.value.getFrom(groupID = id)
+    }
 }

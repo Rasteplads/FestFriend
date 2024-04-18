@@ -1,8 +1,5 @@
 package com.rasteplads.festfriend.pages
 
-import android.Manifest
-import android.location.Location
-import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,47 +8,38 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.tasks.Task
+import androidx.navigation.NavHostController
+import com.rasteplads.festfriend.AppState
 import com.rasteplads.festfriend.Friends
+import com.rasteplads.festfriend.Position
 
-@RequiresPermission(
-    anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
-)
 @Composable
 fun MapPage(
-    groupID: String,
-    password: String,
-    username: String,
-    friends: Friends,
-    onUpdateFriendsListClick: () -> Unit
+    appState: AppState
 ){
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Group ID: #$groupID",
+            text = "Group ID: #${appState.groupID}",
             modifier = Modifier.padding(10.dp)
         )
         Text(
-            text = "Password: $password",
+            text = "Password: ${appState.password}",
             modifier = Modifier.padding(10.dp)
         )
         Text(
-            text = "username: $username",
+            text = "username: ${appState.username}",
             modifier = Modifier.padding(10.dp)
         )
         Divider(Modifier.fillMaxWidth(0.8f) )
-        for ((name, pos) in friends){
+        for ((name, pos) in appState.friends){
             Text(text = "$name: lat:${pos.latitude}, long: ${pos.longitude}")
-        }
-        Button(
-            onClick = onUpdateFriendsListClick,
-            modifier = Modifier.fillMaxWidth(0.8f)) {
-            Text(text = "Update Friend List")
         }
     }
 }

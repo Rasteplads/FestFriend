@@ -1,7 +1,5 @@
 package com.rasteplads.festfriend
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import javax.crypto.Cipher
@@ -11,12 +9,15 @@ data class Position(var longitude: Float, var latitude: Float)
 typealias Friends = HashMap<String, Position>
 typealias FriendNameMap = HashMap<UByte, String>
 
-class GroupCommunicator(private val friendPosUpdater: () -> Unit){
+class GroupCommunicator(
+    private val friendPosUpdater: () -> Unit,
+    private var _id: MessageID = MessageID(),
+    private var _body: Body = Body()
+){
     private lateinit var _key: SecretKeySpec
     private var _myPassword: String = ""
     private var _myUsername: String = ""
-    private var _id = MessageID()
-    private var _body = Body()
+
     private var _groupID: UShort = 0u
 
     private var _friends: Friends = Friends()
@@ -51,6 +52,7 @@ class GroupCommunicator(private val friendPosUpdater: () -> Unit){
 
     fun joinGroup(groupID: UShort, username: String, password: String): GroupCommunicator{
         this._groupID = groupID
+        this._id.receiverID = this._groupID
         _myUsername = username
         _myPassword = password
         _key = getKey(groupID.toString() + password)
@@ -83,11 +85,11 @@ class GroupCommunicator(private val friendPosUpdater: () -> Unit){
     }
 
     fun messageIDFromBytes(bytes: ByteArray): MessageID{
-        return MessageID.fromByteArray(decrypt(_key, bytes))
+        return MessageID.fromByteArray(bytes)
     }
 
     fun bytesFromMessageID(messageID: MessageID): ByteArray{
-        return encrypt(_key, messageID.toByteArray())
+        return messageID.toByteArray()
     }
 
     fun bodyFromBytes(bytes: ByteArray): Body{
@@ -117,9 +119,7 @@ enum class MessageType(val value: UByte){
 
     companion object {
         fun fromValue(value: UByte): MessageType {
-            val entry = entries.firstOrNull { it.value == value }
-            if (entry == null) return UNKOWN
-            return entry
+            return entries.firstOrNull { it.value == value } ?: return UNKOWN
         }
     }
 }
@@ -137,6 +137,10 @@ class MessageID(
 
     fun toByteArray(): ByteArray{
         return ByteBuffer.allocate(4).putShort(receiverID.toShort()).put(incrementer.toByte()).put(userID.toByte()).array()
+    }
+
+    override fun toString(): String {
+        return "MessageID(receiverID=$receiverID, incrementer=$incrementer, userID=$userID)"
     }
 
     fun copy(): MessageID{
@@ -162,7 +166,7 @@ class Body(
     var latitude: Float = 0f,
 ){
     fun toByteArray(): ByteArray{
-        return ByteBuffer.allocate(24).put(type.value.toByte()).putFloat(longitude).putFloat(latitude).array()
+        return ByteBuffer.allocate(23).put(type.value.toByte()).putFloat(longitude).putFloat(latitude).array()
     }
 
     fun copy(): Body{
@@ -170,13 +174,13 @@ class Body(
     }
 
     override fun toString(): String {
-        return "Message(type=$type, longitude=$longitude, latitude=$latitude)"
+        return "Body(type=$type, longitude=$longitude, latitude=$latitude)"
     }
 
     companion object {
         fun fromByteArray(bytes: ByteArray): Body{
-            if (bytes.size != 24)
-                throw  Exception("Body array size does not match 24 chars")
+            if (bytes.size != 23)
+                throw  Exception("Body array size does not match 23 chars")
             val buffer = ByteBuffer.wrap(bytes)
             val type = MessageType.fromValue(buffer.get().toUByte())
             val longitude = buffer.getFloat()
