@@ -53,6 +53,7 @@ import org.osmdroid.views.MapView
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.doOnLayout
+import com.rasteplads.festfriend.AppState
 import com.rasteplads.festfriend.R
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -67,7 +68,9 @@ import org.osmdroid.util.BoundingBox
 
 @Composable
 fun MapPage(
-    appState: AppState
+    appState: AppState,
+    groupID: String,
+    friends: Friends,
 ){
     Box(modifier = Modifier.fillMaxSize()) {
         // Actual map

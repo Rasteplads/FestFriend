@@ -67,7 +67,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                             delay(5000)
                         }
                     }
-                    MapPage(appState)
+                    MapPage(appState, friends = appState.friends, groupID = appState.groupID)
                 }
             }
         }
