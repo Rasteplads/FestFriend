@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -131,7 +130,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                                 CancellationTokenSource().token
                             ).addOnSuccessListener {
                                 if (it == null) {
-                                    Log.d("Location", "Could not find location")
+                                    appViewModel.locationError("Could not find location of device.")
                                 } else {
                                     appViewModel.updatePosition(
                                         Position(
