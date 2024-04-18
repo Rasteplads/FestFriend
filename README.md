@@ -13,3 +13,12 @@ In the following files, change the address '0.0.0.0' to your FestFriendServer's 
 
 - /app/main/java/com.rasteplads.festfriend/utils/Constants.kt
 - /app/main/java/res/xml/network_security_config.xml
+
+
+# Contributing
+
+Whenever other submodules have gotten new commits the command: 
+```
+git submodule update --remote
+```
+needs to be run in order to get the latest commits

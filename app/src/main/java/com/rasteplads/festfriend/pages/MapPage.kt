@@ -67,10 +67,7 @@ import org.osmdroid.util.BoundingBox
 
 @Composable
 fun MapPage(
-    groupID: String,
-    password: String,
-    username: String,
-    friends: Friends,
+    appState: AppState
 ){
     Box(modifier = Modifier.fillMaxSize()) {
         // Actual map
