@@ -20,4 +20,7 @@ class MainActivity : ComponentActivity() {
             FestFriendApplication()
         }
     }
+
+    override fun onBackPressed() {}  // Do nothing, because we do not want the user to accidentally swipe out of the map
+
 }
