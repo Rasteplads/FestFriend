@@ -2,11 +2,11 @@ package com.rasteplads.festfriend
 
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.rasteplads.festfriend.pages.JoinGroupPage
+import com.rasteplads.festfriend.pages.CreateGroupPage
 import org.junit.Rule
 import org.junit.Test
 
-class JoinGroupPageTest {
+class CreateGroupPageTest {
     @get:Rule
     val rule = createComposeRule()
 
@@ -14,22 +14,20 @@ class JoinGroupPageTest {
     fun showErrorsTest(){
         val appState = AppState(
             usernameError = InputError(true, "uError"),
-            groupIDError = InputError(true, "gError"),
             passwordError = InputError(true, "pError"),
             genericError = InputError(true, "gcError"),
         )
         rule.setContent {
-            JoinGroupPage(
+            CreateGroupPage(
                 appState = appState,
                 onUsernameChange = {},
-                onGroupIDChange = {},
                 onPasswordChange = {},
-                onJoinButtonClick = {},
+                onCreateButtonClick = {},
                 onBackButtonClick = {}
             )
         }
 
-        val msgs = arrayOf("uError", "gError", "pError", "gcError")
+        val msgs = arrayOf("uError", "pError", "gcError")
 
         msgs.forEach {
             rule.onNode(hasText(it)).assertExists()
@@ -40,25 +38,24 @@ class JoinGroupPageTest {
     fun noErrorsTest(){
         val appState = AppState(
             usernameError = InputError(false, "uError"),
-            groupIDError = InputError(false, "gError"),
             passwordError = InputError(false, "pError"),
             genericError = InputError(false, "gcError"),
         )
         rule.setContent {
-            JoinGroupPage(
+            CreateGroupPage(
                 appState = appState,
                 onUsernameChange = {},
-                onGroupIDChange = {},
                 onPasswordChange = {},
-                onJoinButtonClick = {},
+                onCreateButtonClick = {},
                 onBackButtonClick = {}
             )
         }
 
-        val msgs = arrayOf("uError", "gError", "pError", "gcError")
+        val msgs = arrayOf("uError", "pError", "gcError")
 
         msgs.forEach {
             rule.onNode(hasText(it)).assertDoesNotExist()
         }
     }
+
 }
