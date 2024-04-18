@@ -129,9 +129,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
                                 Priority.PRIORITY_LOW_POWER,
                                 CancellationTokenSource().token
                             ).addOnSuccessListener {
-                                if (it == null) {
-                                    appViewModel.locationError("Could not find location of device.")
-                                } else {
+                                if (it != null) {
                                     appViewModel.updatePosition(
                                         Position(
                                             it.longitude.toFloat(),

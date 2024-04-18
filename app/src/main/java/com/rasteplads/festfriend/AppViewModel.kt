@@ -15,7 +15,6 @@ enum class ErrorType() {
     User,
     Pass,
     Group,
-    Location,
     Generic
 }
 
@@ -46,10 +45,6 @@ class AppViewModel: ViewModel() {
         updateInputError(ErrorType.Generic, true, msg)
     }
 
-    fun locationError(msg: String) {
-        updateInputError(ErrorType.Location, true, msg)
-    }
-
     fun clearError(errorType: ErrorType){
         updateInputError(errorType, false, "")
     }
@@ -59,7 +54,6 @@ class AppViewModel: ViewModel() {
             ErrorType.User -> _uiState.value = _uiState.value.getFrom(usernameError = error)
             ErrorType.Pass -> _uiState.value = _uiState.value.getFrom(passwordError = error)
             ErrorType.Group -> _uiState.value = _uiState.value.getFrom(groupIDError = error)
-            ErrorType.Location -> _uiState.value = _uiState.value.getFrom(locationError = error)
             ErrorType.Generic -> _uiState.value = _uiState.value.getFrom(genericError = error)
         }
 
@@ -69,9 +63,8 @@ class AppViewModel: ViewModel() {
         val pass = _uiState.value.passwordError.isError
         val user = _uiState.value.usernameError.isError
         val group = _uiState.value.groupIDError.isError
-        val location = uiState.value.locationError.isError
         val generic = _uiState.value.genericError.isError
-        return pass || user || group || location || generic
+        return pass || user || group || generic
     }
 
     fun updateFriendsList(){

@@ -14,7 +14,6 @@ data class AppState (
     val usernameError: InputError = InputError(),
     val passwordError: InputError = InputError(),
     val groupIDError: InputError = InputError(),
-    val locationError: InputError = InputError(),
     val genericError: InputError = InputError()
 ){
     fun getFrom(
@@ -26,10 +25,9 @@ data class AppState (
         usernameError: InputError = this.usernameError,
         passwordError: InputError = this.passwordError,
         groupIDError: InputError = this.groupIDError,
-        locationError: InputError = this.locationError,
         genericError: InputError = this.genericError
 
         ): AppState{
-        return AppState(groupID, password, username, position, friends, usernameError, passwordError, groupIDError, locationError, genericError)
+        return AppState(groupID, password, username, position, friends, usernameError, passwordError, groupIDError, genericError)
     }
 }
