@@ -2,6 +2,7 @@ package com.rasteplads.festfriend
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -35,8 +36,24 @@ import kotlinx.coroutines.delay
 
 enum class JoinOrCreate { Join, Create, None }
 
+fun CreateLocationPermissionMessage(context: Context) {
+    val builder = AlertDialog.Builder(context)
+    builder.setMessage("This app requires your location to work as expected")
+        .setTitle("Permission Required")
+        .setCancelable(true)
+        .setPositiveButton("Settings") { dialog, which ->
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            val uri = Uri.fromParts("package", context.packageName, null)
+            intent.setData(uri)
+            context.startActivity(intent)
+
+            dialog.dismiss()
+        }
+    builder.show()
+}
+
 @Composable
-fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
+fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
 
     val appState by appViewModel.uiState.collectAsState()
     val navController = rememberNavController()
@@ -50,26 +67,15 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()){
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
-            if (action == JoinOrCreate.Join)
-                appViewModel.joinGroup(navToMap)
-            else if (action == JoinOrCreate.Create)
-                appViewModel.createGroup(navToMap)
-        } else {
-            val builder = AlertDialog.Builder(context)
-            builder.setMessage("This app requires your location to work as expected")
-                .setTitle("Permission Required")
-                .setCancelable(true)
-                .setPositiveButton("Settings") { dialog, which ->
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    val uri = Uri.fromParts("package", context.packageName, null)
-                    intent.setData(uri)
-                    context.startActivity(intent)
-
-                    dialog.dismiss()
-                }
-            builder.show()
+        if (!isGranted) {
+            CreateLocationPermissionMessage(context)
+            return@rememberLauncherForActivityResult
         }
+
+        if (action == JoinOrCreate.Join)
+            appViewModel.joinGroup(navToMap)
+        if (action == JoinOrCreate.Create)
+            appViewModel.createGroup(navToMap)
     }
 
     FestFriendTheme(dynamicColor = false) {
