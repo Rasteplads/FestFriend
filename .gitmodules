@@ -1,6 +1,7 @@
 [submodule "submodules/event-mesh-protocol"]
 	path = submodules/event-mesh-protocol
 	url = git@github.com:Rasteplads/event-mesh-protocol.git
+    branch = settings
 [submodule "submodules/FestFriendServer"]
 	path = submodules/FestFriendServer
 	url = git@github.com:Rasteplads/FestFriendServer.git
