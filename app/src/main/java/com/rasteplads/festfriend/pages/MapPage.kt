@@ -44,9 +44,12 @@ import com.rasteplads.festfriend.AppState
 import com.rasteplads.festfriend.Friends
 import com.rasteplads.festfriend.Position
 import com.rasteplads.festfriend.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.Delay
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -99,7 +102,6 @@ fun GroupIdDisplay(groupID: String) {
 @Composable
 fun rememberMapViewWithLifecycle(appState: AppState): MapView {
     val friends = appState.friends
-    Log.d("Testt", friends.toString())
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
@@ -107,13 +109,12 @@ fun rememberMapViewWithLifecycle(appState: AppState): MapView {
         }
     }
 
+
     // Changes map bounding box to friends
     var hasZoomed by remember { mutableStateOf(false) }
-    Log.d("Test", "Friends: " + friends.toString())
-    LaunchedEffect(friends) {
-        if (!hasZoomed) {
+    LaunchedEffect(arrayOf(friends, appState.position)) {
+        if (!hasZoomed && positionLoaded(appState)) {
             mapView.doOnLayout {
-                Log.d("Test", "Here")
                 zoomToFriends(appState.position, friends, mapView)
             }
             hasZoomed = true;
@@ -140,15 +141,16 @@ fun rememberMapViewWithLifecycle(appState: AppState): MapView {
     return mapView
 }
 
+fun positionLoaded(appState: AppState): Boolean{
+    return appState.position != Position(0f,0f)
+}
+
 fun zoomToFriends(myPosition: Position, friends: Friends, map: MapView){
     // Instantiate to default (your position)
     var latMin = myPosition.latitude
     var latMax = myPosition.latitude
     var lngMin = myPosition.longitude
     var lngMax = myPosition.longitude
-
-    Log.d("Test", "Zooming")
-    Log.d("Test", latMin.toString())
 
     for ((_, pos) in friends){
         latMin = minOf(latMin, pos.latitude)
