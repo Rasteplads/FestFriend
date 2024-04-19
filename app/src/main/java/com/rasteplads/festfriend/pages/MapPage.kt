@@ -1,6 +1,5 @@
 package com.rasteplads.festfriend.pages
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -99,7 +98,6 @@ fun GroupIdDisplay(groupID: String) {
 @Composable
 fun rememberMapViewWithLifecycle(appState: AppState): MapView {
     val friends = appState.friends
-    Log.d("Testt", friends.toString())
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
@@ -107,17 +105,14 @@ fun rememberMapViewWithLifecycle(appState: AppState): MapView {
         }
     }
 
+
     // Changes map bounding box to friends
     var hasZoomed by remember { mutableStateOf(false) }
-    Log.d("Test", "Friends: " + friends.toString())
-    LaunchedEffect(friends) {
-        if (!hasZoomed) {
-            mapView.doOnLayout {
-                Log.d("Test", "Here")
-                zoomToFriends(appState.position, friends, mapView)
-            }
-            hasZoomed = true;
-        }
+    LaunchedEffect(arrayOf(friends, appState.position)) {
+        if (hasZoomed || !positionLoaded(appState)) return@LaunchedEffect
+
+        zoomToFriends(appState.position, friends, mapView)
+        hasZoomed = true;
     }
 
     // Updates markers when there are changes to friends
@@ -140,15 +135,16 @@ fun rememberMapViewWithLifecycle(appState: AppState): MapView {
     return mapView
 }
 
+fun positionLoaded(appState: AppState): Boolean{
+    return appState.position != Position(0f,0f)
+}
+
 fun zoomToFriends(myPosition: Position, friends: Friends, map: MapView){
     // Instantiate to default (your position)
     var latMin = myPosition.latitude
     var latMax = myPosition.latitude
     var lngMin = myPosition.longitude
     var lngMax = myPosition.longitude
-
-    Log.d("Test", "Zooming")
-    Log.d("Test", latMin.toString())
 
     for ((_, pos) in friends){
         latMin = minOf(latMin, pos.latitude)
