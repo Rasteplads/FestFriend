@@ -3,6 +3,7 @@ package com.rasteplads.festfriend
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.rasteplads.festfriend.api.FestFriendAPIClient
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,7 +69,7 @@ class AppViewModel: ViewModel() {
     }
 
     fun updateFriendsList(){
-        API.getMembers(com.groupID, com.password, ::serverError){
+        API.getMembers(MainScope(), com.groupID, com.password, ::serverError){
             com.updateFriendMap(it)
             _uiState.value = _uiState.value.getFrom(friends = com.friends)
         }
@@ -89,7 +90,7 @@ class AppViewModel: ViewModel() {
 
         val id = groupID.toUShort()
 
-        API.joinGroup(id, user, pass, ::serverError){
+        API.joinGroup(MainScope(), id, user, pass, ::serverError){
             com.joinGroup(id, user, pass)
             this.updateFriendsList()
             uiHandler()
@@ -107,7 +108,7 @@ class AppViewModel: ViewModel() {
         if (isInputError())
             return
 
-        API.createGroup(pass, ::serverError){
+        API.createGroup(MainScope(), pass, ::serverError){
             com.joinGroup(it, user, pass)
             this.updateFriendsList()
             _uiState.value = _uiState.value.getFrom(groupID = it.toString())

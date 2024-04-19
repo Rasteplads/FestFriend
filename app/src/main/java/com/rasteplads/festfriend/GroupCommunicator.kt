@@ -44,7 +44,6 @@ class GroupCommunicator(
                 _id.userID = index.toUByte()
                 return@forEachIndexed
             }
-
             _friendMap[index.toUByte()] = friend
             this._friends[friend] = Position(0f, 0f)
         }

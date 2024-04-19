@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.foundation.layout.android)
     testImplementation(libs.junit)
+    testImplementation("io.mockk:mockk:1.13.10")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -73,7 +74,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.6.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation(project(":eventmesh"))
 }
 

@@ -73,7 +73,7 @@ fun CreateGroupPage(
         Button(
             onClick = onCreateButtonClick,
             modifier = Modifier.fillMaxWidth(0.8f).padding(top = 15.dp)) {
-            Text(text = "Join Group")
+            Text(text = "Create Group")
         }
         if (appState.genericError.isError)
             Text(text = appState.genericError.msg, color = MaterialTheme.colorScheme.error)
