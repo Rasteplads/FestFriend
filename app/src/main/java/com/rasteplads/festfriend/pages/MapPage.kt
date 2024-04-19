@@ -1,6 +1,5 @@
 package com.rasteplads.festfriend.pages
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,12 +43,9 @@ import com.rasteplads.festfriend.AppState
 import com.rasteplads.festfriend.Friends
 import com.rasteplads.festfriend.Position
 import com.rasteplads.festfriend.R
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
-import org.osmdroid.util.Delay
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
