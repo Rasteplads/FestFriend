@@ -109,12 +109,10 @@ fun rememberMapViewWithLifecycle(appState: AppState): MapView {
     // Changes map bounding box to friends
     var hasZoomed by remember { mutableStateOf(false) }
     LaunchedEffect(arrayOf(friends, appState.position)) {
-        if (!hasZoomed && positionLoaded(appState)) {
-            mapView.doOnLayout {
-                zoomToFriends(appState.position, friends, mapView)
-            }
-            hasZoomed = true;
-        }
+        if (hasZoomed || !positionLoaded(appState)) return@LaunchedEffect
+
+        zoomToFriends(appState.position, friends, mapView)
+        hasZoomed = true;
     }
 
     // Updates markers when there are changes to friends
