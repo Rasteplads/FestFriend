@@ -53,10 +53,11 @@ import org.osmdroid.views.overlay.Marker
 @Composable
 fun MapPage(
     appState: AppState,
+    onMarkerMade: () -> Unit = {}, //Default that does nothing
 ){
     Box(modifier = Modifier.fillMaxSize()) {
         // Actual map
-        MapViewComp(appState)
+        MapViewComp(appState, onMarkerMade = onMarkerMade)
     }
     // Code at the top
     GroupIdDisplay(groupID = appState.groupID)
@@ -96,7 +97,7 @@ fun GroupIdDisplay(groupID: String) {
 
 
 @Composable
-fun rememberMapViewWithLifecycle(appState: AppState): MapView {
+fun rememberMapViewWithLifecycle(appState: AppState, onMarkerMade: () -> Unit): MapView {
     val friends = appState.friends
     val context = LocalContext.current
     val mapView = remember {
@@ -117,7 +118,7 @@ fun rememberMapViewWithLifecycle(appState: AppState): MapView {
 
     // Updates markers when there are changes to friends
     LaunchedEffect(arrayOf(friends, appState.position)) {
-        createMarkers(appState.username, appState.position, friends, mapView)
+        createMarkers(appState.username, appState.position, friends, mapView, onMarkerMade)
     }
 
     // Makes MapView follow the lifecycle of this composable (nej jeg ved ikke hvad det betyder)
@@ -159,7 +160,7 @@ fun zoomToFriends(myPosition: Position, friends: Friends, map: MapView){
         1000.0,500)
 }
 
-fun createMarkers (username: String, myPosition: Position, friends: Friends, map: MapView){
+fun createMarkers (username: String, myPosition: Position, friends: Friends, map: MapView, onMarkerMade: () -> Unit){
     map.overlays.clear()
 
     createMarker(username, myPosition.latitude, myPosition.longitude, map, 0)
@@ -167,6 +168,7 @@ fun createMarkers (username: String, myPosition: Position, friends: Friends, map
     var counter = 1
     for ((name, pos) in friends){
         createMarker(name, pos.latitude, pos.longitude, map, counter++)
+        onMarkerMade()
     }
 }
 
@@ -206,8 +208,9 @@ fun MapViewComp(
     appState: AppState,
     modifier: Modifier = Modifier,
     onLoad: ((map: MapView) -> Unit)? = null,
+    onMarkerMade: () -> Unit
 ) {
-    val mapViewState = rememberMapViewWithLifecycle(appState)
+    val mapViewState = rememberMapViewWithLifecycle(appState, onMarkerMade = onMarkerMade)
 
     AndroidView(
         { mapViewState },
