@@ -23,7 +23,8 @@ class CreateGroupPageTest {
                 onUsernameChange = {},
                 onPasswordChange = {},
                 onCreateButtonClick = {},
-                onBackButtonClick = {}
+                onBackButtonClick = {},
+                locationPermissionChecker = {c, b, g -> }
             )
         }
 
@@ -47,7 +48,8 @@ class CreateGroupPageTest {
                 onUsernameChange = {},
                 onPasswordChange = {},
                 onCreateButtonClick = {},
-                onBackButtonClick = {}
+                onBackButtonClick = {},
+                locationPermissionChecker = {c, b, g -> }
             )
         }
 
@@ -55,6 +57,26 @@ class CreateGroupPageTest {
 
         msgs.forEach {
             rule.onNode(hasText(it)).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun checkPermissionTrueOnCreateButtonClick(){
+        val appState = AppState(
+            usernameError = InputError(false, "uError"),
+            passwordError = InputError(false, "pError"),
+            genericError = InputError(false, "gcError"),
+        )
+
+        rule.setContent {
+            CreateGroupPage(
+                appState = appState,
+                onUsernameChange = {},
+                onPasswordChange = {},
+                onCreateButtonClick = {},
+                onBackButtonClick = {},
+                locationPermissionChecker = {c, b, g -> }
+            )
         }
     }
 

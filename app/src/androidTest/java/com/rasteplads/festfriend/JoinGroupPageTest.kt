@@ -25,7 +25,8 @@ class JoinGroupPageTest {
                 onGroupIDChange = {},
                 onPasswordChange = {},
                 onJoinButtonClick = {},
-                onBackButtonClick = {}
+                onBackButtonClick = {},
+                locationPermissionChecker = {c, b, g -> }
             )
         }
 
@@ -51,7 +52,8 @@ class JoinGroupPageTest {
                 onGroupIDChange = {},
                 onPasswordChange = {},
                 onJoinButtonClick = {},
-                onBackButtonClick = {}
+                onBackButtonClick = {},
+                locationPermissionChecker = {c, b, g -> }
             )
         }
 

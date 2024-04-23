@@ -53,7 +53,9 @@ import org.osmdroid.views.overlay.Marker
 @Composable
 fun MapPage(
     appState: AppState,
+    getLocation: @Composable () -> Unit,
 ){
+    getLocation()
     Box(modifier = Modifier.fillMaxSize()) {
         // Actual map
         MapViewComp(appState)

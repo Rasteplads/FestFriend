@@ -1,42 +1,33 @@
 package com.rasteplads.festfriend
 
-import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.rasteplads.festfriend.pages.CreateGroupPage
 import com.rasteplads.festfriend.pages.FestFriendScreen
 import com.rasteplads.festfriend.pages.JoinGroupPage
 import com.rasteplads.festfriend.pages.LandingPage
 import com.rasteplads.festfriend.pages.MapPage
+import com.rasteplads.festfriend.pages.shared.CheckLocationPermission
+import com.rasteplads.festfriend.pages.shared.GetLocation
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
-import kotlinx.coroutines.delay
 
 enum class JoinOrCreate { Join, Create, None }
 
-fun CreateLocationPermissionMessage(context: Context) {
+fun PermissionNotGrantedMessage(context: Context) {
     val builder = AlertDialog.Builder(context)
     builder.setMessage("This app requires your location to work as expected")
         .setTitle("Permission Required")
@@ -57,25 +48,13 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
 
     val appState by appViewModel.uiState.collectAsState()
     val navController = rememberNavController()
-    val navToMap = { navController.navigate(FestFriendScreen.Map.name) }
-    val context = LocalContext.current
-    val locationClient = remember {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
-    var action = JoinOrCreate.None
-    val permission = Manifest.permission.ACCESS_FINE_LOCATION
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (!isGranted) {
-            CreateLocationPermissionMessage(context)
-            return@rememberLauncherForActivityResult
-        }
 
-        if (action == JoinOrCreate.Join)
-            appViewModel.joinGroup(navToMap)
-        if (action == JoinOrCreate.Create)
-            appViewModel.createGroup(navToMap)
+    val navToMap = { navController.navigate(FestFriendScreen.Map.name) }
+    val ctx = LocalContext.current
+
+    val locationPermissionChecker = @Composable {
+        c: Context, b: Boolean, g: (Boolean) -> Unit ->
+        CheckLocationPermission(c, b, g)
     }
 
     FestFriendTheme(dynamicColor = false) {
@@ -93,18 +72,18 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                         onUsernameChange = { appViewModel.updateUsername(it) },
                         onPasswordChange = { appViewModel.updatePassword(it) },
                         onCreateButtonClick = {
-                            val permissionCheckResult = ContextCompat.checkSelfPermission(context, permission)
-                            if (permissionCheckResult == PackageManager.PERMISSION_GRANTED)
-                                appViewModel.createGroup(navToMap)
-                            else{
-                                action = JoinOrCreate.Create
-                                locationPermissionLauncher.launch(permission)
-                            }},
+                                    if (it)
+                                        appViewModel.createGroup(navToMap)
+                                    else
+                                        PermissionNotGrantedMessage(ctx)
+                        },
                         onBackButtonClick = {
                             navController.popBackStack()
                             appViewModel.clearError(ErrorType.Generic)
-                        }
+                        },
+                        locationPermissionChecker = locationPermissionChecker
                     )
+
                 }
                 composable(FestFriendScreen.JoinGroup.name) {
                     JoinGroupPage(
@@ -113,41 +92,32 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                         onUsernameChange = { appViewModel.updateUsername(it) },
                         onPasswordChange = { appViewModel.updatePassword(it) },
                         onJoinButtonClick = {
-                            val permissionCheckResult = ContextCompat.checkSelfPermission(context, permission)
-                            if (permissionCheckResult == PackageManager.PERMISSION_GRANTED)
-                                appViewModel.createGroup(navToMap)
-                            else{
-                                action = JoinOrCreate.Join
-                                locationPermissionLauncher.launch(permission)
-                            }},
+                            if (it)
+                                appViewModel.joinGroup(navToMap)
+                            else
+                                PermissionNotGrantedMessage(ctx)
+                        },
                         onBackButtonClick = {
                             navController.popBackStack()
                             appViewModel.clearError(ErrorType.Generic)
                             appViewModel.clearError(ErrorType.Group)
-                        }
+                        },
+                        locationPermissionChecker = locationPermissionChecker
                     )
+
                 }
                 composable(FestFriendScreen.Map.name){
-                    LaunchedEffect(Unit) {
-                        while (true) {
+                    val getLocation = @Composable {
+                        GetLocation(ctx) {
                             appViewModel.updateFriendsList()
-                            locationClient.getCurrentLocation(
-                                Priority.PRIORITY_LOW_POWER,
-                                CancellationTokenSource().token
-                            ).addOnSuccessListener {
-                                if (it != null) {
-                                    appViewModel.updatePosition(
-                                        Position(
-                                            it.longitude.toFloat(),
-                                            it.latitude.toFloat()
-                                        )
-                                    )
-                                }
-                            }
-                            delay(5000)
+                            appViewModel.updatePosition(it)
                         }
                     }
-                    MapPage(appState)
+
+                    MapPage(
+                        appState,
+                        getLocation = getLocation
+                    )
                 }
             }
         }
