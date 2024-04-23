@@ -1,5 +1,6 @@
 package com.rasteplads.festfriend.pages
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,8 +13,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -21,15 +27,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rasteplads.festfriend.AppState
 import com.rasteplads.festfriend.pages.shared.BackButton
+import com.rasteplads.festfriend.pages.shared.CheckLocationPermission
 
 @Composable
 fun CreateGroupPage(
     appState: AppState,
     onUsernameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onCreateButtonClick: () -> Unit,
+    onCreateButtonClick: (Boolean) -> Unit,
     onBackButtonClick: () -> Unit,
+    locationPermissionChecker: @Composable (Context, Boolean, (Boolean) -> Unit) -> Unit
 ){
+    var checkLocationPermission by remember { mutableStateOf(false) }
+    val ctx = LocalContext.current
+
+    locationPermissionChecker(ctx, checkLocationPermission) {
+        onCreateButtonClick(it)
+        checkLocationPermission = false
+    }
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -54,7 +70,10 @@ fun CreateGroupPage(
         if (appState.usernameError.isError)
             Text(text = appState.usernameError.msg, color = MaterialTheme.colorScheme.error)
 
-        Divider(Modifier.fillMaxWidth(0.8f).padding(top = 15.dp) )
+        Divider(
+            Modifier
+                .fillMaxWidth(0.8f)
+                .padding(top = 15.dp) )
         TextField(
             value = appState.password,
             onValueChange = onPasswordChange,
@@ -71,8 +90,10 @@ fun CreateGroupPage(
             Text(text = appState.passwordError.msg, color = MaterialTheme.colorScheme.error)
 
         Button(
-            onClick = onCreateButtonClick,
-            modifier = Modifier.fillMaxWidth(0.8f).padding(top = 15.dp)) {
+            onClick = { checkLocationPermission = true },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .padding(top = 15.dp)) {
             Text(text = "Create Group")
         }
         if (appState.genericError.isError)
