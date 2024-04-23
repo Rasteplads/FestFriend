@@ -1,10 +1,16 @@
 package com.rasteplads.festfriend
 
+import android.util.Log
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.rasteplads.festfriend.pages.CreateGroupPage
 import org.junit.Rule
 import org.junit.Test
+import org.junit.Assert.*
 
 class CreateGroupPageTest {
     @get:Rule
@@ -68,6 +74,7 @@ class CreateGroupPageTest {
             genericError = InputError(false, "gcError"),
         )
 
+        var locationCheckerRan = false
         rule.setContent {
             CreateGroupPage(
                 appState = appState,
@@ -75,9 +82,15 @@ class CreateGroupPageTest {
                 onPasswordChange = {},
                 onCreateButtonClick = {},
                 onBackButtonClick = {},
-                locationPermissionChecker = {c, b, g -> }
+                locationPermissionChecker = @Composable { c, b, g ->
+                    if (b)
+                        locationCheckerRan = true
+                }
             )
         }
+        rule.onNodeWithText("Create Group").performClick()
+        rule.waitForIdle()
+        assertEquals(true, locationCheckerRan)
     }
 
 }
