@@ -41,7 +41,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: test-summary/action@v2.3
         with:
           submodules: 'true'
       - name: Set up JDK 11
@@ -53,6 +52,13 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: echo 'no' | ./gradlew build --scan
+      - name: Test Summary
+        uses: test-summary/action@v2
+        with:
+          paths: |
+              test-one/**/TEST-*.xml
+              test-two/results/results.tap
+          if: always()
   create-artifacts:
     needs: [ build, format ]
     runs-on: ubuntu-latest
