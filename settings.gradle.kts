@@ -1,5 +1,7 @@
 include(":eventmesh")
 project(":eventmesh").projectDir = File("./submodules/event-mesh-protocol")
+include(":eventmeshandroid")
+project(":eventmeshandroid").projectDir = File("./submodules/event-mesh-android")
 
 pluginManagement {
     repositories {

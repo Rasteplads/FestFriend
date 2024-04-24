@@ -12,20 +12,25 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.rasteplads.eventmeshandroid.REQUIRED_PERMISSIONS
 import com.rasteplads.festfriend.Position
 import kotlinx.coroutines.delay
 
 
 @Composable
-fun CheckLocationPermission(ctx: Context, checkLocationPermission: Boolean, granted: (Boolean) -> Unit){
-    val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission(), granted)
-
-    if (checkLocationPermission){
-        val isGranted = ContextCompat.checkSelfPermission(ctx, locationPermission)
-        if (isGranted != PackageManager.PERMISSION_GRANTED)
-            launcher.launch(locationPermission)
+fun CheckPermissions(ctx: Context, checkPermissions: Boolean, granted: (Boolean) -> Unit){
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ grantedMaps ->
+       granted(grantedMaps.values.all { it })
     }
+
+    if (!checkPermissions)
+        return
+    if (REQUIRED_PERMISSIONS.any {
+                permission -> (ContextCompat.checkSelfPermission(ctx, permission)
+                != PackageManager.PERMISSION_GRANTED)
+        })
+        launcher.launch(REQUIRED_PERMISSIONS)
+
 }
 
 @Composable

@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rasteplads.festfriend.AppState
 import com.rasteplads.festfriend.pages.shared.BackButton
-import com.rasteplads.festfriend.pages.shared.CheckLocationPermission
 
 @Composable
 fun CreateGroupPage(

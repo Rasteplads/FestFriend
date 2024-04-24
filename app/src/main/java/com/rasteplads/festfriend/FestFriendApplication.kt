@@ -21,11 +21,9 @@ import com.rasteplads.festfriend.pages.FestFriendScreen
 import com.rasteplads.festfriend.pages.JoinGroupPage
 import com.rasteplads.festfriend.pages.LandingPage
 import com.rasteplads.festfriend.pages.MapPage
-import com.rasteplads.festfriend.pages.shared.CheckLocationPermission
+import com.rasteplads.festfriend.pages.shared.CheckPermissions
 import com.rasteplads.festfriend.pages.shared.GetLocation
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
-
-enum class JoinOrCreate { Join, Create, None }
 
 fun PermissionNotGrantedMessage(context: Context) {
     val builder = AlertDialog.Builder(context)
@@ -54,7 +52,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
 
     val locationPermissionChecker = @Composable {
         c: Context, b: Boolean, g: (Boolean) -> Unit ->
-        CheckLocationPermission(c, b, g)
+        CheckPermissions(c, b, g)
     }
 
     FestFriendTheme(dynamicColor = false) {
@@ -73,7 +71,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                         onPasswordChange = { appViewModel.updatePassword(it) },
                         onCreateButtonClick = {
                                     if (it)
-                                        appViewModel.createGroup(navToMap)
+                                        appViewModel.createGroup(ctx, navToMap)
                                     else
                                         PermissionNotGrantedMessage(ctx)
                         },
@@ -93,7 +91,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                         onPasswordChange = { appViewModel.updatePassword(it) },
                         onJoinButtonClick = {
                             if (it)
-                                appViewModel.joinGroup(navToMap)
+                                appViewModel.joinGroup(ctx, navToMap)
                             else
                                 PermissionNotGrantedMessage(ctx)
                         },

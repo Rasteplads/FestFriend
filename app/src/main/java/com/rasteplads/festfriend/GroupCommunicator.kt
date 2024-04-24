@@ -136,7 +136,7 @@ class MessageID(
     }
 
     fun toByteArray(): ByteArray{
-        return ByteBuffer.allocate(4).putShort(receiverID.toShort()).put(incrementer.toByte()).put(userID.toByte()).array()
+        return ByteBuffer.allocate(MessageID.SIZE).putShort(receiverID.toShort()).put(incrementer.toByte()).put(userID.toByte()).array()
     }
 
     override fun toString(): String {
@@ -148,8 +148,8 @@ class MessageID(
     }
     companion object {
         fun fromByteArray(bytes: ByteArray): MessageID{
-            if (bytes.size != 4)
-                throw  Exception("MessageID array size does not match 4 chars")
+            if (bytes.size != SIZE)
+                throw  Exception("MessageID array size does not match $SIZE chars")
             val buffer = ByteBuffer.wrap(bytes)
             val rec = buffer.getShort().toUShort()
             val inc = buffer.get().toUByte()
@@ -157,6 +157,8 @@ class MessageID(
 
             return MessageID(rec, inc, userID)
         }
+
+        val SIZE = 4
     }
 }
 
@@ -166,7 +168,7 @@ class Body(
     var latitude: Float = 0f,
 ){
     fun toByteArray(): ByteArray{
-        return ByteBuffer.allocate(23).put(type.value.toByte()).putFloat(longitude).putFloat(latitude).array()
+        return ByteBuffer.allocate(Body.SIZE).put(type.value.toByte()).putFloat(longitude).putFloat(latitude).array()
     }
 
     fun copy(): Body{
@@ -179,8 +181,8 @@ class Body(
 
     companion object {
         fun fromByteArray(bytes: ByteArray): Body{
-            if (bytes.size != 23)
-                throw  Exception("Body array size does not match 23 chars")
+            if (bytes.size != SIZE)
+                throw  Exception("Body array size does not match $SIZE chars")
             val buffer = ByteBuffer.wrap(bytes)
             val type = MessageType.fromValue(buffer.get().toUByte())
             val longitude = buffer.getFloat()
@@ -188,6 +190,7 @@ class Body(
 
             return Body(type, longitude, latitude)
         }
+        val SIZE = 9
     }
 }
 

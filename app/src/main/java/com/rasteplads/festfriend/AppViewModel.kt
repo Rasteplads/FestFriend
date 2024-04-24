@@ -1,13 +1,17 @@
 package com.rasteplads.festfriend
 
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
+import com.rasteplads.eventmeshandroid.AndroidBluetoothTransportDevice
 import com.rasteplads.festfriend.api.FestFriendAPIClient
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import rasteplads.api.EventMesh
+import java.time.Duration
 
 typealias API = FestFriendAPIClient
 typealias FestFriendMesh = EventMesh<MessageID, Body>
@@ -24,7 +28,8 @@ class AppViewModel: ViewModel() {
     val uiState: StateFlow<AppState> = _uiState.asStateFlow()
 
     private val com: GroupCommunicator = GroupCommunicator(::friendUpdate)
-    /*private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body>()
+    private val _device: AndroidBluetoothTransportDevice = AndroidBluetoothTransportDevice()
+    private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body>(_device)
         .setMessageCallback(com::messageHandler)
 
         .setIDGenerator(com::messageID)
@@ -34,9 +39,14 @@ class AppViewModel: ViewModel() {
         .setDataEncodeFunction(com::bytesFromBody)
         .setIDDecodeFunction(com::messageIDFromBytes)
         .setIDEncodeFunction(com::bytesFromMessageID)
+        .withMsgSendInterval(Duration.ofSeconds(3))
+        .addFilterFunction { com.groupID == it.receiverID }
+        .build()
 
-        .addFilterFunction { com.groupID == it.receiverID }.build()*/
-        //TODO: Find out when to execute eventmesh and integrate eventmeshdevicetransmitter
+    override fun onCleared() {
+        eventMesh.stop()
+        super.onCleared()
+    }
 
     private fun friendUpdate(){
         _uiState.value = _uiState.value.getFrom(friends = com.friends)
@@ -75,7 +85,7 @@ class AppViewModel: ViewModel() {
         }
     }
 
-    fun joinGroup(uiHandler: () -> Unit = {}){
+    fun joinGroup(ctx: Context, uiHandler: () -> Unit = {}){
         clearError(ErrorType.Generic)
         val groupID = _uiState.value.groupID
         val user = _uiState.value.username
@@ -93,11 +103,14 @@ class AppViewModel: ViewModel() {
         API.joinGroup(MainScope(), id, user, pass, ::serverError){
             com.joinGroup(id, user, pass)
             this.updateFriendsList()
+            _device.contextProvider = { ctx }
+            _device.bluetoothProvider = {ctx.getSystemService(BluetoothManager::class.java).adapter}
+            eventMesh.start()
             uiHandler()
         }
     }
 
-    fun createGroup(uiHandler: () -> Unit = {}){
+    fun createGroup(ctx: Context, uiHandler: () -> Unit = {}){
         clearError(ErrorType.Generic)
         val user = _uiState.value.username
         val pass = _uiState.value.password
@@ -110,9 +123,8 @@ class AppViewModel: ViewModel() {
 
         API.createGroup(MainScope(), pass, ::serverError){
             com.joinGroup(it, user, pass)
-            this.updateFriendsList()
             _uiState.value = _uiState.value.getFrom(groupID = it.toString())
-            joinGroup(uiHandler)
+            joinGroup(ctx, uiHandler)
         }
     }
 

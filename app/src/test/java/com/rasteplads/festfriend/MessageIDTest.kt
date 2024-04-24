@@ -8,7 +8,7 @@ class MessageIDTest {
     @Test
     fun toByteArrayTest(){
         val expected = ByteBuffer
-            .allocate(4)
+            .allocate(MessageID.SIZE)
             .putShort(55)
             .put(2.toByte())
             .put(128.toByte()).array()
@@ -28,7 +28,7 @@ class MessageIDTest {
     @Test
     fun fromByteArrayTest(){
         val bytes = ByteBuffer
-            .allocate(4)
+            .allocate(MessageID.SIZE)
             .putShort(55)
             .put(2.toByte())
             .put(128.toByte()).array()
