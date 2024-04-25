@@ -1,5 +1,6 @@
 package com.rasteplads.festfriend
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.util.Log
@@ -8,12 +9,24 @@ import androidx.lifecycle.ViewModel
 import com.rasteplads.eventmeshandroid.AndroidBluetoothTransportDevice
 import com.rasteplads.festfriend.api.FestFriendAPIClient
 import com.rasteplads.festfriend.utils.Constants.Companion.MODEL_TAG
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.yield
 import rasteplads.api.EventMesh
+import rasteplads.api.TransportDevice
+import rasteplads.util.plus
+import java.nio.ByteBuffer
 import java.time.Duration
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 typealias API = FestFriendAPIClient
 typealias FestFriendMesh = EventMesh<MessageID, Body>
@@ -25,12 +38,85 @@ enum class ErrorType() {
     Generic
 }
 
+class MockDevice(override val transmissionInterval: Long) : TransportDevice {
+    val transmittedMessages: AtomicReference<MutableList<ByteArray>> =
+        AtomicReference(mutableListOf())
+    val receivedMsg: AtomicReference<ByteArray?> = AtomicReference(null)
+
+    val transmitting: AtomicBoolean = AtomicBoolean(false)
+    val receiving: AtomicBoolean = AtomicBoolean(false)
+
+    private var tx: Job? = null
+    private lateinit var _contextProvider: () -> Context
+    private lateinit var _bluetoothProvider: () -> BluetoothAdapter
+
+    public var contextProvider: () -> Context
+        get() = _contextProvider
+        set(value) {
+            _contextProvider = value
+        }
+
+    public var bluetoothProvider: () -> BluetoothAdapter
+        get() = _bluetoothProvider
+        set(value) {
+            _bluetoothProvider = value
+        }
+
+    override fun beginTransmitting(message: ByteArray): Unit = runBlocking {
+        transmitting.set(true)
+
+        tx =
+            GlobalScope.launch {
+                try {
+                    while (isActive) {
+                        yield()
+                        transmittedMessages.get().add(message.clone())
+                        yield()
+                        delay(transmissionInterval)
+                        yield()
+                    }
+                } catch (_: Exception) {}
+            }
+    }
+
+    override fun stopTransmitting() {
+        tx?.cancel()
+        tx = null
+        transmitting.set(false)
+    }
+
+    override fun beginReceiving(callback: suspend (ByteArray) -> Unit) = runBlocking {
+        receiving.set(true)
+
+        while (receiving.get()) {
+            receivedMsg.getAndSet(null)?.let { callback(it) }
+            yield()
+            delay(50) // 1 sec
+            yield()
+        }
+    }
+
+    override fun stopReceiving(): Unit = receiving.set(false)
+
+    fun receiveMessage(b: ByteArray) = runBlocking {
+        if (!receiving.get()) return@runBlocking
+        receivedMsg.set(b)
+        while (receiving.get() && receivedMsg.get() != null) {
+            delay(50)
+            yield()
+        }
+
+        // receivedPool.get().add(b)
+    }
+}
+
 class AppViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(AppState())
     val uiState: StateFlow<AppState> = _uiState.asStateFlow()
 
     private val com: GroupCommunicator = GroupCommunicator(::friendUpdate)
-    private val _device: AndroidBluetoothTransportDevice = AndroidBluetoothTransportDevice()
+    //private val _device: AndroidBluetoothTransportDevice = AndroidBluetoothTransportDevice()
+    private val _device: MockDevice = MockDevice(5000)
     private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body>(_device)
         .setMessageCallback(com::messageHandler)
 
@@ -111,6 +197,21 @@ class AppViewModel: ViewModel() {
             _device.contextProvider = { ctx }
             _device.bluetoothProvider = {ctx.getSystemService(BluetoothManager::class.java).adapter}
             eventMesh.start()
+            GlobalScope.launch {
+                val b: Byte = 1
+                var x = 0
+                var y = 0
+                while (true){
+                    if (x > 5)
+                        x = 0
+                    if (y > 5)
+                        y = 0
+                    _device.receiveMessage(b + MessageID(com.groupID, userID = 69.toUByte()).toByteArray() + com.bytesFromBody(Body(longitude = x.toFloat(), latitude = y.toFloat())))
+                    x++
+                    y++
+                    delay(5000)
+                }
+            }
             uiHandler()
             Log.d(MODEL_TAG, "Join Group handled")
         }

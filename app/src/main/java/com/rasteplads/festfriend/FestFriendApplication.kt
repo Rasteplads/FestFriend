@@ -55,7 +55,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
         CheckPermissions(c, b, g)
     }
 
-    FestFriendTheme(dynamicColor = false) {
+    FestFriendTheme() {
         Surface(Modifier.fillMaxSize()) {
             NavHost(navController, startDestination = FestFriendScreen.Landing.name){
                 composable(FestFriendScreen.Landing.name){
