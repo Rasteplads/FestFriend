@@ -28,9 +28,11 @@ fun CheckPermissions(ctx: Context, checkPermissions: Boolean, granted: (Boolean)
     if (REQUIRED_PERMISSIONS.any {
                 permission -> (ContextCompat.checkSelfPermission(ctx, permission)
                 != PackageManager.PERMISSION_GRANTED)
-        })
+        }) {
         launcher.launch(REQUIRED_PERMISSIONS)
-
+        return
+    }
+    granted(true)
 }
 
 @Composable
@@ -45,14 +47,16 @@ fun GetLocation(ctx: Context, onSuccess: (Position) -> Unit){
         return
 
     LaunchedEffect(Unit) {
-        locationClient.getCurrentLocation(
-            Priority.PRIORITY_LOW_POWER,
-            CancellationTokenSource().token
-        ).addOnSuccessListener {
-            if (it == null)
-                return@addOnSuccessListener
-            onSuccess(Position(it.longitude.toFloat(), it.latitude.toFloat()))
+        while (true){
+            locationClient.getCurrentLocation(
+                Priority.PRIORITY_LOW_POWER,
+                CancellationTokenSource().token
+            ).addOnSuccessListener {
+                if (it == null)
+                    return@addOnSuccessListener
+                onSuccess(Position(it.longitude.toFloat(), it.latitude.toFloat()))
+            }
+            delay(5000)
         }
-        delay(5000)
     }
 }

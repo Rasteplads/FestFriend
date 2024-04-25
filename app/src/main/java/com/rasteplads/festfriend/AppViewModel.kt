@@ -2,10 +2,12 @@ package com.rasteplads.festfriend
 
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.util.Log
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.rasteplads.eventmeshandroid.AndroidBluetoothTransportDevice
 import com.rasteplads.festfriend.api.FestFriendAPIClient
+import com.rasteplads.festfriend.utils.Constants.Companion.MODEL_TAG
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -79,13 +81,16 @@ class AppViewModel: ViewModel() {
     }
 
     fun updateFriendsList(){
+        Log.d(MODEL_TAG, "Update Friends List")
         API.getMembers(MainScope(), com.groupID, com.password, ::serverError){
             com.updateFriendMap(it)
             _uiState.value = _uiState.value.getFrom(friends = com.friends)
+            Log.d(MODEL_TAG, "Update Friends List handled")
         }
     }
 
     fun joinGroup(ctx: Context, uiHandler: () -> Unit = {}){
+        Log.d(MODEL_TAG, "Join Group")
         clearError(ErrorType.Generic)
         val groupID = _uiState.value.groupID
         val user = _uiState.value.username
@@ -107,10 +112,12 @@ class AppViewModel: ViewModel() {
             _device.bluetoothProvider = {ctx.getSystemService(BluetoothManager::class.java).adapter}
             eventMesh.start()
             uiHandler()
+            Log.d(MODEL_TAG, "Join Group handled")
         }
     }
 
     fun createGroup(ctx: Context, uiHandler: () -> Unit = {}){
+        Log.d(MODEL_TAG, "Create Group")
         clearError(ErrorType.Generic)
         val user = _uiState.value.username
         val pass = _uiState.value.password
@@ -125,12 +132,14 @@ class AppViewModel: ViewModel() {
             com.joinGroup(it, user, pass)
             _uiState.value = _uiState.value.getFrom(groupID = it.toString())
             joinGroup(ctx, uiHandler)
+            Log.d(MODEL_TAG, "Create Group handled")
         }
     }
 
     fun updatePosition(pos: Position){
         com.updatePosition(pos)
         _uiState.value = _uiState.value.getFrom(position = pos)
+        Log.d(MODEL_TAG, "User position updated")
     }
 
     fun updateMessageType(messageType: MessageType){ com.updateMessageType(messageType) }
