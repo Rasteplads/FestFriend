@@ -114,12 +114,11 @@ class AppViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(AppState())
     val uiState: StateFlow<AppState> = _uiState.asStateFlow()
 
-    private val com: GroupCommunicator = GroupCommunicator(::friendUpdate)
-    //private val _device: AndroidBluetoothTransportDevice = AndroidBluetoothTransportDevice()
-    private val _device: MockDevice = MockDevice(5000)
+    private val com: GroupCommunicatorInterface = GroupCommunicator(::friendUpdate)
+    private val _device: AndroidBluetoothTransportDevice = AndroidBluetoothTransportDevice()
+    //private val _device: MockDevice = MockDevice(5000)
     private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body>(_device)
         .setMessageCallback(com::messageHandler)
-
         .setIDGenerator(com::messageID)
         .setDataGenerator(com::body)
 
@@ -127,7 +126,9 @@ class AppViewModel: ViewModel() {
         .setDataEncodeFunction(com::bytesFromBody)
         .setIDDecodeFunction(com::messageIDFromBytes)
         .setIDEncodeFunction(com::bytesFromMessageID)
-        .withMsgSendInterval(Duration.ofSeconds(3))
+        //.withMsgSendInterval(Duration.ofSeconds(10))
+        .withMsgScanDuration(Duration.ofSeconds(60))
+        .withMsgScanInterval(Duration.ofSeconds(1))
         .addFilterFunction { com.groupID == it.receiverID }
         .build()
 
@@ -197,7 +198,7 @@ class AppViewModel: ViewModel() {
             _device.contextProvider = { ctx }
             _device.bluetoothProvider = {ctx.getSystemService(BluetoothManager::class.java).adapter}
             eventMesh.start()
-            GlobalScope.launch {
+            /*GlobalScope.launch {
                 val b: Byte = 1
                 var x = 0
                 var y = 0
@@ -211,7 +212,7 @@ class AppViewModel: ViewModel() {
                     y++
                     delay(5000)
                 }
-            }
+            }*/
             uiHandler()
             Log.d(MODEL_TAG, "Join Group handled")
         }

@@ -3,10 +3,16 @@ package com.rasteplads.festfriend
 import android.util.Log
 import com.rasteplads.festfriend.utils.Constants
 import com.rasteplads.festfriend.utils.Constants.Companion.GROUP_TAG
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.security.MessageDigest
+import java.time.Duration
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
+import kotlin.math.cos
+import kotlin.math.sin
 
 data class Position(var longitude: Float, var latitude: Float)
 typealias Friends = HashMap<String, Position>
@@ -16,30 +22,51 @@ class GroupCommunicator(
     private val friendPosUpdater: () -> Unit,
     private var _id: MessageID = MessageID(),
     private var _body: Body = Body()
-){
+): GroupCommunicatorInterface{
     private lateinit var _key: SecretKeySpec
     private var _myPassword: String = ""
     private var _myUsername: String = ""
 
     private var _groupID: UShort = 0u
 
-    private var _friends: Friends = Friends()
+    private var _friends: Friends = hashMapOf(
+        "John" to Position(2f, 2f)
+    )
     private var _friendMap: FriendNameMap = FriendNameMap()
 
-    val groupID
+    override val groupID
         get () = _groupID
 
-    val password
+    override val password
         get () = _myPassword
 
-    val friends
+    override val friends
         get () = _friends
 
-    val username
+    override val username
         get () = _myUsername
 
-    fun updateFriendMap(friends: Array<String>): GroupCommunicator{
-        this._friends.clear()
+    init {
+        GlobalScope.launch {
+            var x = 0f
+            var y = 0f
+            while (true){
+                if (x > 10)
+                    x = 0f
+                if (y > 10)
+                    y = 0f
+                x++
+                y++
+                _friends["John"] = Position(x, y)
+                Log.d(GROUP_TAG, _friends["John"].toString())
+                friendPosUpdater()
+                delay(500)
+            }
+        }
+    }
+
+    override fun updateFriendMap(friends: Array<String>): GroupCommunicator{
+        /*this._friends.clear()
         _friendMap.clear()
 
         friends.forEachIndexed { index, friend ->
@@ -49,11 +76,11 @@ class GroupCommunicator(
             }
             _friendMap[index.toUByte()] = friend
             this._friends[friend] = Position(0f, 0f)
-        }
+        }*/
         return this
     }
 
-    fun joinGroup(groupID: UShort, username: String, password: String): GroupCommunicator{
+    override fun joinGroup(groupID: UShort, username: String, password: String): GroupCommunicator{
         this._groupID = groupID
         this._id.receiverID = this._groupID
         _myUsername = username
@@ -63,18 +90,18 @@ class GroupCommunicator(
         return this
     }
 
-    fun updatePosition(pos: Position): GroupCommunicator{
+    override fun updatePosition(pos: Position): GroupCommunicator{
         _body.longitude = pos.longitude
         _body.latitude = pos.latitude
         return this
     }
 
-    fun updateMessageType(messageType: MessageType): GroupCommunicator{
+    override fun updateMessageType(messageType: MessageType): GroupCommunicator{
         _body.type = messageType
         return this
     }
 
-    fun messageHandler(messageID: MessageID, body: Body){
+    override fun messageHandler(messageID: MessageID, body: Body){
         val friendID = messageID.userID
         val name = _friendMap[friendID] ?: friendID.toString()
 
@@ -89,34 +116,34 @@ class GroupCommunicator(
         Log.d(GROUP_TAG, "Message Handled: $messageID, $body")
     }
 
-    fun messageIDFromBytes(bytes: ByteArray): MessageID{
+    override fun messageIDFromBytes(bytes: ByteArray): MessageID{
         Log.d(GROUP_TAG, "MessageID From Bytes")
         return MessageID.fromByteArray(bytes)
     }
 
-    fun bytesFromMessageID(messageID: MessageID): ByteArray{
+    override fun bytesFromMessageID(messageID: MessageID): ByteArray{
         Log.d(GROUP_TAG, "Bytes From MessageID")
         return messageID.toByteArray()
     }
 
-    fun bodyFromBytes(bytes: ByteArray): Body{
+    override fun bodyFromBytes(bytes: ByteArray): Body{
         Log.d(GROUP_TAG, "Body From Bytes")
         return Body.fromByteArray(decrypt(_key, bytes))
     }
 
-    fun bytesFromBody(body: Body): ByteArray{
+    override fun bytesFromBody(body: Body): ByteArray{
         Log.d(GROUP_TAG, "Bytes From Body")
         return encrypt(_key, body.toByteArray())
     }
 
-    fun messageID(): MessageID{
+    override fun messageID(): MessageID{
         Log.d(GROUP_TAG, "MessageID Getter")
         val id = _id.copy()
         _id++
         return id
     }
 
-    fun body(): Body{
+    override fun body(): Body{
         Log.d(GROUP_TAG, "Body Getter")
         return _body.copy()
     }
