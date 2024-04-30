@@ -1,8 +1,5 @@
 package com.rasteplads.festfriend
 
-import android.util.Log
-import com.rasteplads.festfriend.utils.Constants
-import com.rasteplads.festfriend.utils.Constants.Companion.GROUP_TAG
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import javax.crypto.Cipher
@@ -39,16 +36,18 @@ class GroupCommunicator(
         get () = _myUsername
 
     fun updateFriendMap(friends: Array<String>): GroupCommunicator{
-        this._friends.clear()
-        _friendMap.clear()
 
         friends.forEachIndexed { index, friend ->
             if (friend == _myUsername){
                 _id.userID = index.toUByte()
                 return@forEachIndexed
             }
-            _friendMap[index.toUByte()] = friend
-            this._friends[friend] = Position(0f, 0f)
+            val friendID = index.toUByte()
+            if (!_friendMap.containsKey(friendID))
+                _friendMap[friendID] = friend
+
+            if (!_friends.containsKey(friend))
+                this._friends[friend] = Position(0f, 0f)
         }
         return this
     }
@@ -59,7 +58,6 @@ class GroupCommunicator(
         _myUsername = username
         _myPassword = password
         _key = getKey(groupID.toString() + password)
-        Log.d(GROUP_TAG, "Group joined")
         return this
     }
 
@@ -86,38 +84,31 @@ class GroupCommunicator(
         pos?.longitude = body.longitude
         pos?.latitude = body.latitude
         friendPosUpdater()
-        Log.d(GROUP_TAG, "Message Handled: $messageID, $body")
     }
 
     fun messageIDFromBytes(bytes: ByteArray): MessageID{
-        Log.d(GROUP_TAG, "MessageID From Bytes")
         return MessageID.fromByteArray(bytes)
     }
 
     fun bytesFromMessageID(messageID: MessageID): ByteArray{
-        Log.d(GROUP_TAG, "Bytes From MessageID")
         return messageID.toByteArray()
     }
 
     fun bodyFromBytes(bytes: ByteArray): Body{
-        Log.d(GROUP_TAG, "Body From Bytes")
         return Body.fromByteArray(decrypt(_key, bytes))
     }
 
     fun bytesFromBody(body: Body): ByteArray{
-        Log.d(GROUP_TAG, "Bytes From Body")
         return encrypt(_key, body.toByteArray())
     }
 
     fun messageID(): MessageID{
-        Log.d(GROUP_TAG, "MessageID Getter")
         val id = _id.copy()
         _id++
         return id
     }
 
     fun body(): Body{
-        Log.d(GROUP_TAG, "Body Getter")
         return _body.copy()
     }
 }
