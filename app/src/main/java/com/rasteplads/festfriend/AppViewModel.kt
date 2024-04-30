@@ -135,9 +135,9 @@ class AppViewModel: ViewModel() {
         eventMesh.stop()
         super.onCleared()
     }
-    private var friendTick = false
+    private var friendTick = 0
     private fun friendUpdate(){
-        friendTick = !friendTick
+        friendTick++
         _uiState.value = _uiState.value.getFrom(friends = com.friends, friendTick = friendTick)
     }
 
