@@ -10,6 +10,7 @@ data class AppState (
     val position: Position = Position(0f, 0f),
 
     val friends: Friends = Friends(),
+    val friendTick: Boolean = false,
 
     val usernameError: InputError = InputError(),
     val passwordError: InputError = InputError(),
@@ -22,12 +23,13 @@ data class AppState (
         username: String = this.username,
         position: Position = this.position,
         friends: Friends = this.friends,
+        friendTick: Boolean = this.friendTick,
         usernameError: InputError = this.usernameError,
         passwordError: InputError = this.passwordError,
         groupIDError: InputError = this.groupIDError,
         genericError: InputError = this.genericError
 
         ): AppState{
-        return AppState(groupID, password, username, position, friends, usernameError, passwordError, groupIDError, genericError)
+        return AppState(groupID, password, username, position, friends, friendTick, usernameError, passwordError, groupIDError, genericError)
     }
 }

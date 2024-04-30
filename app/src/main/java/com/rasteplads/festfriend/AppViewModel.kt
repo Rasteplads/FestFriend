@@ -135,9 +135,10 @@ class AppViewModel: ViewModel() {
         eventMesh.stop()
         super.onCleared()
     }
-
+    private var friendTick = false
     private fun friendUpdate(){
-        _uiState.value = _uiState.value.getFrom(friends = com.friends)
+        friendTick = !friendTick
+        _uiState.value = _uiState.value.getFrom(friends = com.friends, friendTick = friendTick)
     }
 
     private fun serverError(code: Int, msg: String){
@@ -198,7 +199,6 @@ class AppViewModel: ViewModel() {
             _device.bluetoothProvider = {ctx.getSystemService(BluetoothManager::class.java).adapter}
             eventMesh.start()
             GlobalScope.launch {
-                val b: Byte = 1
                 var x = 0
                 var y = 0
                 while (true){
@@ -206,10 +206,10 @@ class AppViewModel: ViewModel() {
                         x = 0
                     if (y > 5)
                         y = 0
-                    _device.receiveMessage(b + MessageID(com.groupID, userID = 69.toUByte()).toByteArray() + com.bytesFromBody(Body(longitude = x.toFloat(), latitude = y.toFloat())))
+                    com.messageHandler(MessageID(com.groupID, userID = 69.toUByte()),  Body(longitude = x.toFloat(), latitude = y.toFloat()))
                     x++
                     y++
-                    delay(5000)
+                    delay(500)
                 }
             }
             uiHandler()
