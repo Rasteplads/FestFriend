@@ -8,6 +8,7 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -107,14 +108,14 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                 composable(FestFriendScreen.Map.name){
                     val getLocation = @Composable {
                         GetLocation(ctx) {
-                            appViewModel.updateFriendsList()
                             appViewModel.updatePosition(it)
                         }
                     }
 
                     MapPage(
                         appState,
-                        getLocation = getLocation
+                        getLocation = getLocation,
+                        getFriendsClick = {appViewModel.updateFriendsList()}
                     )
                 }
             }

@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.Send
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,6 +61,7 @@ fun MapPage(
     appState: AppState,
     onMarkerMade: () -> Unit = {}, //Default that does nothing
     getLocation: @Composable () -> Unit = {},
+    getFriendsClick: () -> Unit
 ){
     getLocation()
     Box(modifier = Modifier.fillMaxSize()) {
@@ -66,12 +69,15 @@ fun MapPage(
         MapViewComp(appState, onMarkerMade = onMarkerMade)
     }
     // Code at the top
-    GroupIdDisplay(groupID = appState.groupID)
+    GroupIdDisplay(groupID = appState.groupID, getFriendsClick)
 }
 
 @Composable
-fun GroupIdDisplay(groupID: String) {
+fun GroupIdDisplay(groupID: String, getFriendsClick: () -> Unit) {
     Column (horizontalAlignment = Alignment.CenterHorizontally) {
+        Button(onClick = getFriendsClick) {
+            Text(text = "UpdateFriends")
+        }
         Spacer(modifier = Modifier.height(16.dp)) // Add space at the top
 
         val clipboardManager = LocalClipboardManager.current
