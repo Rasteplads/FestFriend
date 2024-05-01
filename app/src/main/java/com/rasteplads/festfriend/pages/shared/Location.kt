@@ -55,7 +55,7 @@ fun GetLocation(ctx: Context, onSuccess: (Position) -> Unit){
             ).addOnSuccessListener {
                 if (it == null)
                     return@addOnSuccessListener
-                onSuccess(Position(it.longitude.toFloat(), it.latitude.toFloat()))
+                onSuccess(Position(it.longitude.toFloat(), it.latitude.toFloat(), System.currentTimeMillis()))
             }
             delay(USER_POSITION_UPDATE)
         }
