@@ -14,6 +14,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.rasteplads.eventmeshandroid.REQUIRED_PERMISSIONS
 import com.rasteplads.festfriend.Position
+import com.rasteplads.festfriend.utils.Constants.Companion.USER_POSITION_UPDATE
 import kotlinx.coroutines.delay
 
 
@@ -56,7 +57,7 @@ fun GetLocation(ctx: Context, onSuccess: (Position) -> Unit){
                     return@addOnSuccessListener
                 onSuccess(Position(it.longitude.toFloat(), it.latitude.toFloat()))
             }
-            delay(5000)
+            delay(USER_POSITION_UPDATE)
         }
     }
 }

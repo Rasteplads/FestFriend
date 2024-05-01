@@ -1,6 +1,5 @@
 package com.rasteplads.festfriend
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.util.Log
@@ -8,25 +7,17 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import com.rasteplads.eventmeshandroid.AndroidBluetoothTransportDevice
 import com.rasteplads.festfriend.api.FestFriendAPIClient
+import com.rasteplads.festfriend.utils.Constants.Companion.EVENT_MESH_SCAN_DURATION
+import com.rasteplads.festfriend.utils.Constants.Companion.EVENT_MESH_SCAN_INTERVAL
+import com.rasteplads.festfriend.utils.Constants.Companion.EVENT_MESH_SEND_INTERVAL
+import com.rasteplads.festfriend.utils.Constants.Companion.EVENT_MESH_SEND_TIMEOUT
 import com.rasteplads.festfriend.utils.Constants.Companion.MODEL_TAG
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
 import rasteplads.api.EventMesh
-import rasteplads.api.TransportDevice
-import rasteplads.util.plus
-import java.nio.ByteBuffer
 import java.time.Duration
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
 
 typealias API = FestFriendAPIClient
 typealias FestFriendMesh = EventMesh<MessageID, Body>
@@ -53,7 +44,12 @@ class AppViewModel: ViewModel() {
         .setDataEncodeFunction(com::bytesFromBody)
         .setIDDecodeFunction(com::messageIDFromBytes)
         .setIDEncodeFunction(com::bytesFromMessageID)
-        .withMsgSendInterval(Duration.ofSeconds(3))
+
+        .withMsgSendInterval(EVENT_MESH_SEND_INTERVAL)
+        .withMsgSendTimeout(EVENT_MESH_SEND_TIMEOUT)
+
+        .withMsgScanInterval(EVENT_MESH_SCAN_INTERVAL)
+        .withMsgScanDuration(EVENT_MESH_SCAN_DURATION)
         .addFilterFunction { com.groupID == it.receiverID }
         .build()
 
