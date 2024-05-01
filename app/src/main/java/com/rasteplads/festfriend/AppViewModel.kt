@@ -125,17 +125,6 @@ class AppViewModel: ViewModel() {
             _device.bluetoothProvider = {ctx.getSystemService(BluetoothManager::class.java).adapter}
             eventMesh.start()
 
-            GlobalScope.launch {
-                var x = 0f
-                while (true){
-                    if (x > 11)
-                        x = 0f
-                    com.messageHandler(MessageID(com.groupID, userID = 69u), Body(longitude = x, latitude = x))
-                    x++
-                    delay(1000)
-                }
-            }
-
             uiHandler()
             Log.d(MODEL_TAG, "Join Group handled")
         }
