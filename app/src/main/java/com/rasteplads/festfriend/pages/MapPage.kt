@@ -49,6 +49,10 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun MapPage(
@@ -165,23 +169,33 @@ fun zoomToFriends(myPosition: Position, friends: Friends, map: MapView){
 fun createMarkers (username: String, myPosition: Position, friends: Friends, map: MapView, onMarkerMade: () -> Unit){
     map.overlays.clear()
 
-    createMarker(username, myPosition.latitude, myPosition.longitude, map, 0)
+    // Create marker for user
+    createMarker(username, myPosition, map, 0, false);
 
+    // Create markers for friends
     var counter = 1
     for ((name, pos) in friends){
-        createMarker(name, pos.latitude, pos.longitude, map, counter++)
+        createMarker(name, pos, map, counter++, true)
         onMarkerMade()
     }
 }
 
-fun createMarker(name: String, lat: Float, long: Float, map: MapView, counter: Int) {
+fun createMarker(name: String, position: Position, map: MapView, counter: Int, showTimestamp: Boolean) {
 
     val marker = Marker(map)
-    marker.setPosition(GeoPoint(lat.toDouble(),long.toDouble()))
+    marker.setPosition(GeoPoint(position.latitude.toDouble(),position.longitude.toDouble()))
     marker.setInfoWindow(null)
     marker.textLabelBackgroundColor = getMarkerColor(counter)
     marker.textLabelFontSize = 50
-    marker.setTextIcon(" $name ")
+
+
+    // Formatting for timestamp
+    val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    val time = sdf.format(Date((position.timestamp)))
+    // Show name and timestamp if enabled
+    val markerText = " $name " +  if (showTimestamp) "$time " else ""
+
+    marker.setTextIcon(markerText)
 
     map.overlays.add(marker);
 }
