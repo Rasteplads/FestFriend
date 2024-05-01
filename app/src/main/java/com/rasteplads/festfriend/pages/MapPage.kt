@@ -170,7 +170,7 @@ fun createMarkers (username: String, myPosition: Position, friends: Friends, map
     map.overlays.clear()
 
     // Create marker for user
-    createMarker(username, myPosition, map, 0, false);
+    createMarker(username, myPosition, map, 0, true);
 
     // Create markers for friends
     var counter = 1

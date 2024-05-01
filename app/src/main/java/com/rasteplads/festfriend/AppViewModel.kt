@@ -124,7 +124,6 @@ class AppViewModel: ViewModel() {
             _device.contextProvider = { ctx }
             _device.bluetoothProvider = {ctx.getSystemService(BluetoothManager::class.java).adapter}
             eventMesh.start()
-
             uiHandler()
             Log.d(MODEL_TAG, "Join Group handled")
         }
