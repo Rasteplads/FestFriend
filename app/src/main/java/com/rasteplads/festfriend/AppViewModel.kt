@@ -48,7 +48,7 @@ class AppViewModel: ViewModel() {
 
         .setIDGenerator(com::messageID)
         .setDataGenerator(com::body)
-
+        .setDataSize(Body.SIZE)
         .setDataDecodeFunction(com::bodyFromBytes)
         .setDataEncodeFunction(com::bytesFromBody)
         .setIDDecodeFunction(com::messageIDFromBytes)
