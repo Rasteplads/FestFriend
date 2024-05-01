@@ -2,13 +2,10 @@ package com.rasteplads.festfriend
 
 import java.nio.ByteBuffer
 import java.security.MessageDigest
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
-data class Position(var longitude: Float, var latitude: Float, var timestamp: String = "")
+data class Position(var longitude: Float, var latitude: Float, var timestamp: Long = 0)
 typealias Friends = HashMap<String, Position>
 typealias FriendNameMap = HashMap<UByte, String>
 
@@ -86,10 +83,7 @@ class GroupCommunicator(
         val pos = _friends[name]
         pos?.longitude = body.longitude
         pos?.latitude = body.latitude
-
-        val currentTime = System.currentTimeMillis()
-        val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-        pos?.timestamp = sdf.format(Date(currentTime))
+        pos?.timestamp = System.currentTimeMillis()
 
         friendPosUpdater()
     }
