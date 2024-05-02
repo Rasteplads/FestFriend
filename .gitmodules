@@ -4,3 +4,6 @@
 [submodule "submodules/FestFriendServer"]
 	path = submodules/FestFriendServer
 	url = git@github.com:Rasteplads/FestFriendServer.git
+[submodule "submodules/event-mesh-android"]
+	path = submodules/event-mesh-android
+	url = https://github.com/Rasteplads/event-mesh-android.git

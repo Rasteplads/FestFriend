@@ -8,7 +8,7 @@ class BodyTest {
     @Test
     fun toByteArrayTest(){
         val expected = ByteBuffer
-            .allocate(23)
+            .allocate(Body.SIZE)
             .put(0b0)
             .putFloat(4f)
             .putFloat(1f).array()
@@ -28,7 +28,7 @@ class BodyTest {
     @Test
     fun fromByteArrayTest(){
         val bytes = ByteBuffer
-            .allocate(23)
+            .allocate(Body.SIZE)
             .put(0b0)
             .putFloat(4f)
             .putFloat(1f).array()

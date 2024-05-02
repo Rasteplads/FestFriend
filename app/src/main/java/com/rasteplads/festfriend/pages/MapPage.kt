@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.Send
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,12 +51,17 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun MapPage(
     appState: AppState,
     onMarkerMade: () -> Unit = {}, //Default that does nothing
-    getLocation: @Composable () -> Unit,
+    getLocation: @Composable () -> Unit = {},
+    getFriendsClick: () -> Unit
 ){
     getLocation()
     Box(modifier = Modifier.fillMaxSize()) {
@@ -62,12 +69,15 @@ fun MapPage(
         MapViewComp(appState, onMarkerMade = onMarkerMade)
     }
     // Code at the top
-    GroupIdDisplay(groupID = appState.groupID)
+    GroupIdDisplay(groupID = appState.groupID, getFriendsClick)
 }
 
 @Composable
-fun GroupIdDisplay(groupID: String) {
+fun GroupIdDisplay(groupID: String, getFriendsClick: () -> Unit) {
     Column (horizontalAlignment = Alignment.CenterHorizontally) {
+        Button(onClick = getFriendsClick) {
+            Text(text = "UpdateFriends")
+        }
         Spacer(modifier = Modifier.height(16.dp)) // Add space at the top
 
         val clipboardManager = LocalClipboardManager.current
@@ -165,23 +175,33 @@ fun zoomToFriends(myPosition: Position, friends: Friends, map: MapView){
 fun createMarkers (username: String, myPosition: Position, friends: Friends, map: MapView, onMarkerMade: () -> Unit){
     map.overlays.clear()
 
-    createMarker(username, myPosition.latitude, myPosition.longitude, map, 0)
+    // Create marker for user
+    createMarker(username, myPosition, map, 0, true);
 
+    // Create markers for friends
     var counter = 1
     for ((name, pos) in friends){
-        createMarker(name, pos.latitude, pos.longitude, map, counter++)
+        createMarker(name, pos, map, counter++, true)
         onMarkerMade()
     }
 }
 
-fun createMarker(name: String, lat: Float, long: Float, map: MapView, counter: Int) {
+fun createMarker(name: String, position: Position, map: MapView, counter: Int, showTimestamp: Boolean) {
 
     val marker = Marker(map)
-    marker.setPosition(GeoPoint(lat.toDouble(),long.toDouble()))
+    marker.setPosition(GeoPoint(position.latitude.toDouble(),position.longitude.toDouble()))
     marker.setInfoWindow(null)
     marker.textLabelBackgroundColor = getMarkerColor(counter)
     marker.textLabelFontSize = 50
-    marker.setTextIcon(" $name ")
+
+
+    // Formatting for timestamp
+    val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    val time = sdf.format(Date((position.timestamp)))
+    // Show name and timestamp if enabled
+    val markerText = " $name " +  if (showTimestamp) "$time " else ""
+
+    marker.setTextIcon(markerText)
 
     map.overlays.add(marker);
 }

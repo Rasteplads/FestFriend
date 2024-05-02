@@ -8,6 +8,7 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -21,11 +22,9 @@ import com.rasteplads.festfriend.pages.FestFriendScreen
 import com.rasteplads.festfriend.pages.JoinGroupPage
 import com.rasteplads.festfriend.pages.LandingPage
 import com.rasteplads.festfriend.pages.MapPage
-import com.rasteplads.festfriend.pages.shared.CheckLocationPermission
+import com.rasteplads.festfriend.pages.shared.CheckPermissions
 import com.rasteplads.festfriend.pages.shared.GetLocation
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
-
-enum class JoinOrCreate { Join, Create, None }
 
 fun PermissionNotGrantedMessage(context: Context) {
     val builder = AlertDialog.Builder(context)
@@ -54,10 +53,10 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
 
     val locationPermissionChecker = @Composable {
         c: Context, b: Boolean, g: (Boolean) -> Unit ->
-        CheckLocationPermission(c, b, g)
+        CheckPermissions(c, b, g)
     }
 
-    FestFriendTheme(dynamicColor = false) {
+    FestFriendTheme() {
         Surface(Modifier.fillMaxSize()) {
             NavHost(navController, startDestination = FestFriendScreen.Landing.name){
                 composable(FestFriendScreen.Landing.name){
@@ -73,7 +72,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                         onPasswordChange = { appViewModel.updatePassword(it) },
                         onCreateButtonClick = {
                                     if (it)
-                                        appViewModel.createGroup(navToMap)
+                                        appViewModel.createGroup(ctx, navToMap)
                                     else
                                         PermissionNotGrantedMessage(ctx)
                         },
@@ -93,7 +92,7 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                         onPasswordChange = { appViewModel.updatePassword(it) },
                         onJoinButtonClick = {
                             if (it)
-                                appViewModel.joinGroup(navToMap)
+                                appViewModel.joinGroup(ctx, navToMap)
                             else
                                 PermissionNotGrantedMessage(ctx)
                         },
@@ -109,14 +108,14 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                 composable(FestFriendScreen.Map.name){
                     val getLocation = @Composable {
                         GetLocation(ctx) {
-                            appViewModel.updateFriendsList()
                             appViewModel.updatePosition(it)
                         }
                     }
 
                     MapPage(
                         appState,
-                        getLocation = getLocation
+                        getLocation = getLocation,
+                        getFriendsClick = {appViewModel.updateFriendsList()}
                     )
                 }
             }

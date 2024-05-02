@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.rasteplads.festfriend"
-        minSdk = 24
+        minSdk = 31
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -78,6 +78,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation(project(":eventmesh"))
+    implementation(project(":eventmeshandroid"))
 }
 
 spotless {
