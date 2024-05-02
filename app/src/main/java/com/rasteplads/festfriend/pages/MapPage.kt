@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.sharp.Send
@@ -38,20 +37,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.doOnLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.rasteplads.festfriend.AppState
 import com.rasteplads.festfriend.Friends
 import com.rasteplads.festfriend.Position
 import com.rasteplads.festfriend.R
+import com.rasteplads.festfriend.UserData
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -69,17 +67,16 @@ fun MapPage(
         MapViewComp(appState, onMarkerMade = onMarkerMade)
     }
     // Code at the top
-    GroupIdDisplay(groupID = appState.groupID, getFriendsClick)
+    //friends and getFriendsClick are only for debugging
+    GroupIdDisplay(groupID = appState.groupID, appState, getFriendsClick)
 }
 
 @Composable
-fun GroupIdDisplay(groupID: String, getFriendsClick: () -> Unit) {
+fun GroupIdDisplay(groupID: String, appState: AppState, getFriendsClick: () -> Unit) {
     Column (horizontalAlignment = Alignment.CenterHorizontally) {
-        Button(onClick = getFriendsClick) {
-            Text(text = "UpdateFriends")
-        }
         Spacer(modifier = Modifier.height(16.dp)) // Add space at the top
-
+        //FriendTable is a debugging tool
+        FriendTable(appState, getFriendsClick)
         val clipboardManager = LocalClipboardManager.current
         val copyToast = Toast.makeText(LocalContext.current, "Copied to clipboard", Toast.LENGTH_SHORT)
         Box(
@@ -107,6 +104,29 @@ fun GroupIdDisplay(groupID: String, getFriendsClick: () -> Unit) {
     }
 }
 
+@Composable
+fun FriendTable(appState: AppState, getFriendsClick: () -> Unit){
+    Row {
+        Text(text = "ID, Username, Sent, Received")
+    }
+    Row {
+        Text(text = userfmt(appState.userID.toUByte(), appState.username, appState.position.sent, appState.position.received))
+    }
+    for ((id, user) in appState.friends){
+        Row {
+            Text(text= userfmt(id, user.username, user.pos.sent, user.pos.received))
+        }
+    }
+
+    Button(onClick = getFriendsClick) {
+        Text(text = "UpdateFriends")
+    }
+}
+
+fun userfmt(id: UByte, username: String, sent: Long, received: Long): String{
+    val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    return "$id, $username, ${sdf.format(Date(sent))}, ${sdf.format(Date(received))}"
+}
 
 @Composable
 fun rememberMapViewWithLifecycle(appState: AppState, onMarkerMade: () -> Unit): MapView {
@@ -149,7 +169,9 @@ fun rememberMapViewWithLifecycle(appState: AppState, onMarkerMade: () -> Unit): 
 }
 
 fun positionLoaded(appState: AppState): Boolean{
-    return appState.position != Position(0f,0f)
+    val longitude = appState.position.longitude
+    val latitude = appState.position.latitude
+    return latitude != 0f && longitude != 0f
 }
 
 fun zoomToFriends(myPosition: Position, friends: Friends, map: MapView){
@@ -159,7 +181,8 @@ fun zoomToFriends(myPosition: Position, friends: Friends, map: MapView){
     var lngMin = myPosition.longitude
     var lngMax = myPosition.longitude
 
-    for ((_, pos) in friends){
+    for ((_, friend) in friends){
+        val pos = friend.pos
         latMin = minOf(latMin, pos.latitude)
         latMax = maxOf(latMax, pos.latitude)
         lngMin = minOf(lngMin, pos.longitude)
@@ -180,8 +203,8 @@ fun createMarkers (username: String, myPosition: Position, friends: Friends, map
 
     // Create markers for friends
     var counter = 1
-    for ((name, pos) in friends){
-        createMarker(name, pos, map, counter++, true)
+    for ((id, friend) in friends){
+        createMarker(friend.username, friend.pos, map, counter++, true)
         onMarkerMade()
     }
 }
@@ -197,7 +220,7 @@ fun createMarker(name: String, position: Position, map: MapView, counter: Int, s
 
     // Formatting for timestamp
     val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-    val time = sdf.format(Date((position.timestamp)))
+    val time = sdf.format(Date((position.sent)))
     // Show name and timestamp if enabled
     val markerText = " $name " +  if (showTimestamp) "$time " else ""
 

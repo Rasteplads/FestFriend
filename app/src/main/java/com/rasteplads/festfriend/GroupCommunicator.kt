@@ -2,12 +2,26 @@ package com.rasteplads.festfriend
 
 import java.nio.ByteBuffer
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
-data class Position(var longitude: Float, var latitude: Float, var timestamp: Long = 0)
-typealias Friends = HashMap<String, Position>
-typealias FriendNameMap = HashMap<UByte, String>
+data class Position(
+    var longitude: Float = 0f,
+    var latitude: Float = 0f,
+    var sent: Long = System.currentTimeMillis(),
+    var received: Long = System.currentTimeMillis()
+)
+
+data class UserData(
+    var id: UByte,
+    var username: String,
+    var pos: Position = Position()
+)
+
+typealias Friends = HashMap<UByte, UserData>
 
 class GroupCommunicator(
     private val friendPosUpdater: () -> Unit,
@@ -21,7 +35,6 @@ class GroupCommunicator(
     private var _groupID: UShort = 0u
 
     private var _friends: Friends = Friends()
-    private var _friendMap: FriendNameMap = FriendNameMap()
 
     val groupID
         get () = _groupID
@@ -31,6 +44,9 @@ class GroupCommunicator(
 
     val friends
         get () = _friends
+
+    val userID
+        get () = _id.userID
 
     val username
         get () = _myUsername
@@ -43,11 +59,8 @@ class GroupCommunicator(
                 return@forEachIndexed
             }
             val friendID = index.toUByte()
-            if (!_friendMap.containsKey(friendID))
-                _friendMap[friendID] = friend
-
-            if (!_friends.containsKey(friend))
-                this._friends[friend] = Position(0f, 0f)
+            if (!_friends.containsKey(friendID))
+                this._friends[friendID] = UserData(friendID, friend)
         }
         return this
     }
@@ -74,16 +87,16 @@ class GroupCommunicator(
 
     fun messageHandler(messageID: MessageID, body: Body){
         val friendID = messageID.userID
-        val name = _friendMap[friendID] ?: friendID.toString()
 
-        if (!_friends.containsKey(name))
-            _friends[name] = Position(0f, 0f)
+        if (!_friends.containsKey(friendID))
+            _friends[friendID] = UserData(friendID, friendID.toString())
 
 
-        val pos = _friends[name]
-        pos?.longitude = body.longitude
-        pos?.latitude = body.latitude
-        pos?.timestamp = System.currentTimeMillis()
+        val user = _friends[friendID]
+        user?.pos?.longitude = body.longitude
+        user?.pos?.latitude = body.latitude
+        user?.pos?.sent = body.timestamp
+        user?.pos?.received = System.currentTimeMillis()
 
         friendPosUpdater()
     }
@@ -111,6 +124,7 @@ class GroupCommunicator(
     }
 
     fun body(): Body{
+        _body.timestamp = System.currentTimeMillis()
         return _body.copy()
     }
 }
@@ -170,17 +184,18 @@ class Body(
     var type: MessageType = MessageType.POS,
     var longitude: Float = 0f,
     var latitude: Float = 0f,
+    var timestamp: Long = 0,
 ){
     fun toByteArray(): ByteArray{
-        return ByteBuffer.allocate(Body.SIZE).put(type.value.toByte()).putFloat(longitude).putFloat(latitude).array()
+        return ByteBuffer.allocate(Body.SIZE).put(type.value.toByte()).putFloat(longitude).putFloat(latitude).putLong(timestamp).array()
     }
 
     fun copy(): Body{
-        return Body(type, longitude, latitude)
+        return Body(type, longitude, latitude, timestamp)
     }
 
     override fun toString(): String {
-        return "Body(type=$type, longitude=$longitude, latitude=$latitude)"
+        return "Body(type=$type, longitude=$longitude, latitude=$latitude, )"
     }
 
     companion object {
@@ -191,10 +206,11 @@ class Body(
             val type = MessageType.fromValue(buffer.get().toUByte())
             val longitude = buffer.getFloat()
             val latitude = buffer.getFloat()
+            val timestamp = buffer.getLong()
 
-            return Body(type, longitude, latitude)
+            return Body(type, longitude, latitude, timestamp)
         }
-        val SIZE = 9
+        val SIZE = 17
     }
 }
 
