@@ -91,7 +91,6 @@ class GroupCommunicator(
         if (!_friends.containsKey(friendID))
             _friends[friendID] = UserData(friendID, friendID.toString())
 
-
         val user = _friends[friendID]
         user?.pos?.longitude = body.longitude
         user?.pos?.latitude = body.latitude
