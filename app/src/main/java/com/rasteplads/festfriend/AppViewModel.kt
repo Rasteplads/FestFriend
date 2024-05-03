@@ -116,6 +116,7 @@ class AppViewModel: ViewModel() {
 
         API.joinGroup(MainScope(), id, user, pass, ::serverError){
             com.joinGroup(id, user, pass)
+            _uiState.value = _uiState.value.getFrom(userID = com.userID.toString())
             this.updateFriendsList()
             _device.contextProvider = { ctx }
             _device.bluetoothProvider = {ctx.getSystemService(BluetoothManager::class.java).adapter}

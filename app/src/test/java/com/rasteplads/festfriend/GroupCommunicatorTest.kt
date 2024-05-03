@@ -49,8 +49,8 @@ class GroupCommunicatorTest {
 
         val friends = com.friends
         val expected = Friends().apply {
-            put("alice",  Position(0f, 0f))
-            put("bob",  Position(0f, 0f))
+            put(0u,  UserData(0u, "alice"))
+            put(1u,  UserData(1u, "bob"))
         }
 
         assertEquals(expected, friends)
@@ -78,10 +78,10 @@ class GroupCommunicatorTest {
         val friendMsg = Body(longitude = 5f, latitude = 2f)
         com.messageHandler(friendID, friendMsg)
 
-        val pos = com.friends["bob"]
+        val friend = com.friends[1u]
 
-        assertEquals(5f, pos?.longitude)
-        assertEquals(2f, pos?.latitude)
+        assertEquals(5f, friend?.pos?.longitude)
+        assertEquals(2f, friend?.pos?.latitude)
     }
 
     @Test
@@ -93,10 +93,11 @@ class GroupCommunicatorTest {
         val friendMsg = Body(longitude = 5f, latitude = 2f)
         com.messageHandler(friendID, friendMsg)
 
-        val pos = com.friends["5"]
+        val friend = com.friends[5u]
 
-        assertEquals(5f, pos?.longitude)
-        assertEquals(2f, pos?.latitude)
+        assertEquals(5f, friend?.pos?.longitude)
+        assertEquals(2f, friend?.pos?.latitude)
+        assertEquals("5", friend?.username)
     }
 
     @Test
@@ -151,13 +152,12 @@ class GroupCommunicatorTest {
 
         val body = Body(MessageType.POS, 23f, 43f)
         val expectedBytes = encrypt(key, body.toByteArray())
-        val actualBytes = com.bytesFromBody(com.body())
+        var actualBody = com.body()
+        actualBody.timestamp = 0
+        val actualBytes = com.bytesFromBody(actualBody)
 
-
-        assertArrayEquals(
-            expectedBytes.toTypedArray(),
-            actualBytes.toTypedArray()
-        )
+        assertEquals(expectedBytes.size, actualBytes.size)
+        assert(expectedBytes.zip(actualBytes).all { it.first == it.second })
     }
 
     @Test
