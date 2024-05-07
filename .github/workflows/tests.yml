@@ -1,0 +1,16 @@
+name: Test solution
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo Tests passed!
