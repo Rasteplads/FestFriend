@@ -93,7 +93,7 @@ class AppViewModel: ViewModel() {
         Log.d(MODEL_TAG, "Update Friends List")
         API.getMembers(MainScope(), com.groupID, com.password, ::serverError){
             com.updateFriendMap(it)
-            _uiState.value = _uiState.value.getFrom(friends = com.friends)
+            _uiState.value = _uiState.value.getFrom(friends = com.friends, userID = com.userID.toString())
             Log.d(MODEL_TAG, "Update Friends List handled")
         }
     }

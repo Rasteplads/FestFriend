@@ -163,8 +163,12 @@ fun rememberMapViewWithLifecycle(appState: AppState, onMarkerMade: () -> Unit): 
             lifecycle.removeObserver(lifecycleObserver)
         }
     }
-    Configuration.getInstance().setUserAgentValue("github-rasteplads-festFriendApp");
-    mapView.setTileSource(TileSourceFactory.MAPNIK)
+
+    // Set the tileSource only once. TODO: Cache our own offline tileSource and give that instead
+    LaunchedEffect(Unit) {
+        Configuration.getInstance().setUserAgentValue("github-rasteplads-festFriendApp");
+        mapView.setTileSource(TileSourceFactory.MAPNIK)
+    }
 
     return mapView
 }
