@@ -108,14 +108,14 @@ fun GroupIdDisplay(groupID: String, appState: AppState, getFriendsClick: () -> U
 @Composable
 fun FriendTable(appState: AppState, getFriendsClick: () -> Unit){
     Row {
-        Text(text = "ID, Username, Sent, Received")
+        Text(text = "ID, Username, Sent, Received", color=Color.Black)
     }
     Row {
-        Text(text = userfmt(appState.userID.toUByte(), appState.username, appState.position.sent, appState.position.received))
+        Text(text = userfmt(appState.userID.toUByte(), appState.username, appState.position.sent, appState.position.received, 0u), color=Color.Black)
     }
     for ((id, user) in appState.friends){
         Row {
-            Text(text= userfmt(id, user.username, user.pos.sent, user.pos.received))
+            Text(text= userfmt(id, user.username, user.pos.sent, user.pos.received, user.incrementer), color=Color.Black)
         }
     }
 
@@ -124,9 +124,9 @@ fun FriendTable(appState: AppState, getFriendsClick: () -> Unit){
     }
 }
 
-fun userfmt(id: UByte, username: String, sent: Long, received: Long): String{
+fun userfmt(id: UByte, username: String, sent: Long, received: Long, incrementer: UByte): String{
     val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-    return "$id, $username, ${sdf.format(Date(sent))}, ${sdf.format(Date(received))}"
+    return "$id, $username, ${sdf.format(Date(sent))}, ${sdf.format(Date(received))}, $incrementer"
 }
 
 @Composable
