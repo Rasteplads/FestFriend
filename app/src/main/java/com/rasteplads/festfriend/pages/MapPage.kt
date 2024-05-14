@@ -137,7 +137,6 @@ fun rememberMapViewWithLifecycle(appState: AppState, onMarkerMade: () -> Unit): 
         MapView(context).apply {
             id = R.id.map
             setMultiTouchControls(true)
-            setBuiltInZoomControls(false)
         }
     }
 
