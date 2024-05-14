@@ -184,6 +184,14 @@ class MessageID(
 
         val SIZE = 4
     }
+
+    override fun equals(other: Any?): Boolean =
+        when (other){
+            is MessageID -> other.userID == this.userID &&
+                    other.incrementer == this.incrementer &&
+                    other.receiverID == this.receiverID
+            else -> false
+        }
 }
 
 class Body(
