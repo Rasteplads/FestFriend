@@ -136,6 +136,7 @@ fun rememberMapViewWithLifecycle(appState: AppState, onMarkerMade: () -> Unit): 
     val mapView = remember {
         MapView(context).apply {
             id = R.id.map
+            setMultiTouchControls(true)
         }
     }
 
