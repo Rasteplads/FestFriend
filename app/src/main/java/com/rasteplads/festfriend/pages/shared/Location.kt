@@ -50,7 +50,7 @@ fun GetLocation(ctx: Context, onSuccess: (Position) -> Unit){
     LaunchedEffect(Unit) {
         while (true){
             locationClient.getCurrentLocation(
-                Priority.PRIORITY_LOW_POWER,
+                Priority.PRIORITY_HIGH_ACCURACY,
                 CancellationTokenSource().token
             ).addOnSuccessListener {
                 if (it == null)
