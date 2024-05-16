@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -99,7 +100,8 @@ fun GroupIdDisplay(groupID: String, appState: AppState, getFriendsClick: () -> U
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
-                Icon(imageVector = Icons.Sharp.Send, contentDescription = "Copy", tint = Color.White)
+                val iconPainter = painterResource(id = R.drawable.copy_icon) // Replace with your icon ID
+                Icon(painter = iconPainter, contentDescription = "Copy", tint = Color.White)
             }
         }
     }
