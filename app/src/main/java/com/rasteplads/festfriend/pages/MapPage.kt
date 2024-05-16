@@ -100,7 +100,7 @@ fun GroupIdDisplay(groupID: String, appState: AppState, getFriendsClick: () -> U
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
-                val iconPainter = painterResource(id = R.drawable.copy_icon) // Replace with your icon ID
+                val iconPainter = painterResource(id = R.drawable.copy_icon)
                 Icon(painter = iconPainter, contentDescription = "Copy", tint = Color.White)
             }
         }
