@@ -53,6 +53,7 @@ class AppViewModel: ViewModel() {
         .withMsgScanDuration(EVENT_MESH_SCAN_DURATION)
         .withMsgTTL(-120)
         .addFilterFunction { com.groupID == it.receiverID }
+        .withLogger(Log::d)
         .build()
 
     override fun onCleared() {
