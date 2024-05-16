@@ -9,7 +9,7 @@ class Constants {
         const val MODEL_TAG = "AppViewModel"
         const val GROUP_TAG = "GroupCommunicator"
         // Phone location update delay (milis)
-        const val USER_POSITION_UPDATE: Long = 5000
+        const val USER_POSITION_UPDATE: Long = 2900
         val EVENT_MESH_SEND_INTERVAL: Duration = Duration.ofSeconds(3)
         val EVENT_MESH_SEND_TIMEOUT: Duration = Duration.ofSeconds((5))
         val EVENT_MESH_SCAN_INTERVAL: Duration = Duration.ofSeconds(5)
