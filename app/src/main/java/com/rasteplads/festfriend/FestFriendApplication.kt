@@ -111,11 +111,16 @@ fun FestFriendApplication(appViewModel: AppViewModel = viewModel()) {
                             appViewModel.updatePosition(it)
                         }
                     }
-
+                    LaunchedEffect(Unit){
+                        while(true){
+                        appViewModel.updateFriendsList()
+                        delay(10000)
+                        }
+                    }
                     MapPage(
                         appState,
                         getLocation = getLocation,
-                        getFriendsClick = {appViewModel.updateFriendsList()}
+                        getFriendsClick = {}
                     )
                 }
             }

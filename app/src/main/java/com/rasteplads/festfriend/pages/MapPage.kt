@@ -60,7 +60,7 @@ fun MapPage(
     appState: AppState,
     onMarkerMade: () -> Unit = {}, //Default that does nothing
     getLocation: @Composable () -> Unit = {},
-    getFriendsClick: () -> Unit
+    getFriendsClick: () -> Unit = {}
 ){
     getLocation()
     Box(modifier = Modifier.fillMaxSize()) {
@@ -77,7 +77,7 @@ fun GroupIdDisplay(groupID: String, appState: AppState, getFriendsClick: () -> U
     Column (horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.height(16.dp)) // Add space at the top
         //FriendTable is a debugging tool
-        FriendTable(appState, getFriendsClick)
+        //FriendTable(appState, getFriendsClick)
         val clipboardManager = LocalClipboardManager.current
         val copyToast = Toast.makeText(LocalContext.current, "Copied to clipboard", Toast.LENGTH_SHORT)
         Box(
