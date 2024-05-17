@@ -25,6 +25,7 @@ import com.rasteplads.festfriend.pages.MapPage
 import com.rasteplads.festfriend.pages.shared.CheckPermissions
 import com.rasteplads.festfriend.pages.shared.GetLocation
 import com.rasteplads.festfriend.ui.theme.FestFriendTheme
+import kotlinx.coroutines.delay
 
 fun PermissionNotGrantedMessage(context: Context) {
     val builder = AlertDialog.Builder(context)

@@ -26,10 +26,10 @@ class MapPageTest {
 
     @Test
     fun MakeMarkersWhenFriends(){
-        var friends = HashMap<String, Position>()
-        friends["Alice"] = Position(10.0f, 5.0f)
-        friends["Bob"] = Position(12.5f, 7.8f)
-        friends["Charlie"] = Position(9.2f, 4.1f)
+        val friends = HashMap<UByte, UserData>()
+        friends[0u] = UserData(id = 0u, pos = Position(10.0f, 5.0f), username = "Alice")
+        friends[1u] = UserData(id = 1u, pos = Position(12.5f, 7.8f), username = "Bob")
+        friends[2u] = UserData(id = 2u, pos = Position(9.2f, 4.1f), username = "Charlie")
 
         val appState = AppState(
             friends = friends
@@ -46,18 +46,18 @@ class MapPageTest {
 
     @Test
     fun MakeNoMarkersWhenNoFriends(){
-        var friends = HashMap<String, Position>()
+        val friends2 = HashMap<UByte, UserData>()
 
         val appState = AppState(
-            friends = friends
+            friends = friends2
         )
 
-        var counter = 0
+        var counter2 = 0
 
         rule.setContent {
-            MapPage(appState = appState, onMarkerMade = {counter++})
+            MapPage(appState = appState, onMarkerMade = {counter2++})
         }
 
-        assertEquals(counter, 0)
+        assertEquals(counter2, 0)
     }
 }
