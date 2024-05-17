@@ -1,6 +1,8 @@
 package com.rasteplads.festfriend
 
 import android.bluetooth.BluetoothManager
+import android.bluetooth.le.AdvertiseCallback
+import android.bluetooth.le.ScanCallback
 import android.content.Context
 import android.util.Log
 import androidx.core.text.isDigitsOnly
@@ -34,9 +36,8 @@ class AppViewModel: ViewModel() {
 
     private val com: GroupCommunicator = GroupCommunicator(::friendUpdate)
     private val _device: AndroidBluetoothTransportDevice = AndroidBluetoothTransportDevice()
-    private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body>(_device)
+    private val eventMesh: FestFriendMesh = EventMesh.builder<MessageID, Body, ScanCallback, AdvertiseCallback>(_device)
         .setMessageCallback(com::messageHandler)
-
         .setIDGenerator(com::messageID)
         .setDataGenerator(com::body)
         .setDataSize(Body.SIZE)
@@ -50,7 +51,9 @@ class AppViewModel: ViewModel() {
 
         .withMsgScanInterval(EVENT_MESH_SCAN_INTERVAL)
         .withMsgScanDuration(EVENT_MESH_SCAN_DURATION)
+        .withMsgTTL(-120)
         .addFilterFunction { com.groupID == it.receiverID }
+        .withLogger(Log::d)
         .build()
 
     override fun onCleared() {

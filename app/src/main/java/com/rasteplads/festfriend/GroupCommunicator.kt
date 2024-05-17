@@ -1,10 +1,8 @@
 package com.rasteplads.festfriend
 
+import android.util.Log
 import java.nio.ByteBuffer
 import java.security.MessageDigest
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
@@ -18,7 +16,8 @@ data class Position(
 data class UserData(
     var id: UByte,
     var username: String,
-    var pos: Position = Position()
+    var pos: Position = Position(),
+    var incrementer: UByte = 0u
 )
 
 typealias Friends = HashMap<UByte, UserData>
@@ -61,6 +60,9 @@ class GroupCommunicator(
             val friendID = index.toUByte()
             if (!_friends.containsKey(friendID))
                 this._friends[friendID] = UserData(friendID, friend)
+            else {
+                this._friends[friendID]?.username = friend
+            }
         }
         return this
     }
@@ -88,14 +90,18 @@ class GroupCommunicator(
     fun messageHandler(messageID: MessageID, body: Body){
         val friendID = messageID.userID
 
-        if (!_friends.containsKey(friendID))
-            _friends[friendID] = UserData(friendID, friendID.toString())
+        if (!_friends.containsKey(friendID) || friendID == _id.userID)
+            return
+            //_friends[friendID] = UserData(friendID, friendID.toString())
 
         val user = _friends[friendID]
-        user?.pos?.longitude = body.longitude
-        user?.pos?.latitude = body.latitude
-        user?.pos?.sent = body.timestamp
-        user?.pos?.received = System.currentTimeMillis()
+        if (messageID.incrementer > (user?.incrementer ?: 0u)){
+            user?.pos?.longitude = body.longitude
+            user?.pos?.latitude = body.latitude
+            user?.pos?.sent = body.timestamp
+            user?.pos?.received = System.currentTimeMillis()
+            user?.incrementer = messageID.incrementer
+        }
 
         friendPosUpdater()
     }
@@ -118,6 +124,7 @@ class GroupCommunicator(
 
     fun messageID(): MessageID{
         val id = _id.copy()
+        Log.d("MessageID", id.toString())
         _id++
         return id
     }
@@ -177,6 +184,14 @@ class MessageID(
 
         val SIZE = 4
     }
+
+    override fun equals(other: Any?): Boolean =
+        when (other){
+            is MessageID -> other.userID == this.userID &&
+                    other.incrementer == this.incrementer &&
+                    other.receiverID == this.receiverID
+            else -> false
+        }
 }
 
 class Body(
